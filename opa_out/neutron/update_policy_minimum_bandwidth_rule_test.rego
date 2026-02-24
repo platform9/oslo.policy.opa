@@ -1,0 +1,6 @@
+package update_policy_minimum_bandwidth_rule_test
+
+import data.update_policy_minimum_bandwidth_rule
+
+test_admin_only_or_manager_and_tenant_id__0 if update_policy_minimum_bandwidth_rule.allow with input as {"credentials": {"roles": ["admin"]}}
+test_admin_only_or_manager_and_tenant_id__1 if update_policy_minimum_bandwidth_rule.allow with input as {"credentials": {"roles": ["manager"], "tenant_id": "bar"}, "target": {"ext_parent_policy_id": "foo"}} with data.lib.get_policy as {"tenant_id": "bar"}

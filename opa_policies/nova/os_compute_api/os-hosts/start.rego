@@ -1,0 +1,14 @@
+package os_compute_api.os_hosts.start
+
+import data.nova_lib
+
+# Start physical host.
+#
+# This API is deprecated in favor of os-hypervisors and os-services.
+# GET  /os-hosts/{host_name}/startup
+# Intended scope(s): project
+# "os_compute_api:os-hosts:start": "rule:context_is_admin"
+
+allow if {
+	nova_lib.context_is_admin
+}

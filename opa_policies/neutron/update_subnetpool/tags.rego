@@ -1,0 +1,26 @@
+package update_subnetpool.tags
+
+import data.neutron_lib
+
+# Update the subnetpool tags
+# PUT  /subnetpools/{id}/tags
+# PUT  /subnetpools/{id}/tags/{tag_id}
+# Intended scope(s): project
+# Target attrs: address_scope_id, default_prefixlen, default_quota, domain_id, id, ip_version, is_default, max_prefixlen, min_prefixlen, name, prefixes, shared, tenant_id
+# "update_subnetpool:tags": "(rule:admin_only) or (role:member and project_id:%(project_id)s)"
+
+allow if {
+	# rule:admin_only
+	neutron_lib.admin_only
+}
+
+allow if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	neutron_lib.same_domain
+}

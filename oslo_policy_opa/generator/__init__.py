@@ -50,6 +50,12 @@ ENFORCER_OPTS = [
         help="Optional policy.yaml file to use as a source of policy"
         "customization (full path)",
     ),
+    cfg.StrOpt(
+        "persona-dir",
+        help="Directory containing per-service persona YAML files "
+        "for realistic test generation. Each file should be named "
+        "{service}.yaml and define personas with full credential shapes.",
+    ),
 ]
 
 

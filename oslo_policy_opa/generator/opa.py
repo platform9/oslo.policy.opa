@@ -28,7 +28,7 @@ from oslo_policy_opa.generator import common
 LOG = logging.getLogger(__name__)
 
 
-IMPORT_REGEX = re.compile(r"lib\.(\w+)\b", flags=re.M)
+IMPORT_REGEX = re.compile(r"(?:\w+_)?lib\.(\w+)\b", flags=re.M)
 
 
 def _get_opa_rule(
@@ -79,6 +79,8 @@ def _translate_default_rule(
     converted_rules: dict[str, types.BaseOpaCheck],
     namespace: typing.Optional[str] = None,
     rule_operations: typing.Optional[list[dict]] = None,
+    rule_metadata: typing.Optional[oslo_policy.policy._BaseRule] = None,
+    target_attr_map=None,
 ):
     """Convert policy.RuleDefault or policy.DocumentedRuleDefault into internal OPA friendly structure
 
@@ -89,14 +91,20 @@ def _translate_default_rule(
         structuring a policy rule into dedicated policy files.
     :param rule_operations: Operations value for the Rule if it is not an
         instance of DocumentedRuleDefault
+    :param rule_metadata: The registered default rule with description,
+        scope_types, and operations metadata. Used for comments when the
+        active rule is a YAML override that lacks this metadata.
     """
 
     opa_rule = _get_opa_rule(rule, results, converted_rules, namespace)
     converted_rules[rule.name] = opa_rule
     lib_part_rules: dict[str, list[str]] = {}
     opa_part_rules = opa_rule.get_opa_policy(lib_part_rules)
-    # opa_rule_tests = opa_rule.get_opa_policy_tests(converted_rules, rule.name)
-    rule_description = _get_rule_help(rule, rule_operations)
+    # Use registered default for description/operations/scope_types metadata
+    help_rule = rule_metadata if rule_metadata else rule
+    rule_description = _get_rule_help(
+        help_rule, rule_operations, target_attr_map=target_attr_map,
+    )
     if hasattr(rule, "operations") and rule.operations or rule_operations:
         # This is the final role
         results.setdefault(rule.name, [rule_description])
@@ -155,17 +163,40 @@ def _generate_rule_tests(
     policy_tests: dict[str, list[str]],
     namespace: typing.Optional[str] = None,
     rule_operations: typing.Optional[list[dict]] = None,
+    personas: typing.Optional[dict] = None,
+    lib_pkg: str = "lib",
 ):
     """Generate OPA tests for the rule.
 
-    :param oslo_policy.policy._BaseRule rule: A policy.RuleDefault or policy.DocumentedRuleDefault object
-    :param dict results: A dictionary with relevant policy rules that is shared globally
+    :param oslo_policy.policy._BaseRule rule: A policy.RuleDefault or
+        policy.DocumentedRuleDefault object
+    :param dict results: A dictionary with relevant policy rules that is
+        shared globally
     :param dict converted_rules: converted rules
     :param namespace: Namespace name that is prepended to the Rule checks for
         structuring a policy rule into dedicated policy files.
+    :param personas: Optional persona definitions for rich test generation.
+    :param lib_pkg: The namespaced lib package name (e.g. "neutron_lib").
     """
     opa_rule = _get_opa_rule(rule, results, converted_rules, namespace)
-    opa_rule_tests = opa_rule.get_opa_policy_tests(converted_rules, rule.name)
+
+    if personas:
+        from oslo_policy_opa.generator import personas as personas_mod
+        # Get minimal test data from the recursive builder to determine
+        # which allow paths exist (admin, member, service, etc.)
+        minimal_datas = opa_rule.get_opa_policy_test_data(
+            converted_rules, rule.name
+        )
+        check_str = str(rule.check) if hasattr(rule, 'check') else ""
+        opa_rule_tests = personas_mod.generate_persona_tests(
+            rule.name, personas, lib_pkg, minimal_datas,
+            check_str=check_str,
+        )
+    else:
+        opa_rule_tests = opa_rule.get_opa_policy_tests(
+            converted_rules, rule.name
+        )
+
     policy_tests[rule.name] = opa_rule_tests
 
     return
@@ -174,6 +205,7 @@ def _generate_rule_tests(
 def _get_rule_help(
     rule: oslo_policy.policy._BaseRule,
     rule_operations: typing.Optional[list[dict]] = None,
+    target_attr_map: typing.Optional[dict] = None,
 ) -> str:
     text: str = f'"{rule.name}": "{rule.check_str}"\n'
     op = ""
@@ -187,8 +219,13 @@ def _get_rule_help(
         intended_scope = (
             "# Intended scope(s): " + ", ".join(rule.scope_types) + "\n"
         )
-    comment = "#"  # if comment_rule else ''
-    text = f"{op}{intended_scope}{comment}{text}\n"
+    target_line = ""
+    if target_attr_map:
+        fields = target_attr_map.get(rule.name)
+        if fields:
+            target_line = "# Target attrs: " + ", ".join(fields) + "\n"
+    comment = "# "
+    text = f"{op}{intended_scope}{target_line}{comment}{text}\n"
     if rule.description:
         text = _format_help_text(rule.description) + "\n" + text
 
@@ -247,6 +284,109 @@ def _format_help_text(description):
     return "\n".join(formatted_lines)
 
 
+# Patterns that indicate an ownership check comparing credentials to target.
+# These rules need same_domain for domain isolation.
+_OWNERSHIP_PATTERNS = [
+    r"input\.credentials\.project_id == input\.target\.project_id",
+    r"input\.target\.project_id == input\.credentials\.project_id",
+    r"input\.credentials\.tenant_id == input\.target\.tenant_id",
+    r"input\.target\.tenant_id == input\.credentials\.tenant_id",
+    r'input\.target\["[^"]*:tenant_id"\] == input\.credentials\.tenant_id',
+    r"input\.credentials\.tenant_id == input\.target\[",
+]
+
+
+_ADMIN_ROLE_PATTERN = r'"admin" in input\.credentials\.roles'
+
+# Legacy admin bypass patterns (is_admin:True, is_admin_project:True).
+# These grant admin access via boolean flags rather than role checks
+# and also need same_domain for domain isolation.
+_LEGACY_ADMIN_PATTERNS = [
+    r"input\.credentials\.is_admin\b",
+    r"input\.credentials\.is_admin_project\b",
+]
+
+# Patterns that indicate the rule already has scope/domain handling
+_ALREADY_SCOPED_PATTERNS = [
+    r"same_domain",
+    r"system_scope",
+    r"input\.credentials\.domain_id == input\.target\.domain_id",
+]
+
+# same_domain definition emitted at the top of every service lib file.
+_SAME_DOMAIN_BLOCK = """\
+# Domain membership: caller and target resource belong to the same domain.
+# target.domain_id is populated by the service enforcement layer.
+same_domain if {
+  input.credentials.system_scope == "all"
+}
+
+same_domain if {
+  input.credentials.project_domain_id == input.target.domain_id
+}
+
+same_domain if {
+  input.credentials.domain_id == input.target.domain_id
+}
+
+"""
+
+
+def _is_ownership_check(rule_text):
+    """Check if a rule body contains an ownership comparison."""
+    for pattern in _OWNERSHIP_PATTERNS:
+        if re.search(pattern, rule_text):
+            return True
+    return False
+
+
+def _is_ungated_admin_check(rule_text):
+    """Check if a rule body grants admin access without scope gating."""
+    if not re.search(_ADMIN_ROLE_PATTERN, rule_text):
+        return False
+    # Already has ownership check -- handled by _is_ownership_check
+    if _is_ownership_check(rule_text):
+        return False
+    # Already has scope/domain handling
+    for pattern in _ALREADY_SCOPED_PATTERNS:
+        if re.search(pattern, rule_text):
+            return False
+    return True
+
+
+def _is_legacy_admin_check(rule_text):
+    """Check if a rule grants admin access via legacy is_admin flag."""
+    for pattern in _LEGACY_ADMIN_PATTERNS:
+        if re.search(pattern, rule_text):
+            for scoped in _ALREADY_SCOPED_PATTERNS:
+                if re.search(scoped, rule_text):
+                    return False
+            return True
+    return False
+
+
+def _needs_same_domain(rule_text):
+    """Check if a rule needs same_domain injection."""
+    return (
+        _is_ownership_check(rule_text)
+        or _is_ungated_admin_check(rule_text)
+        or _is_legacy_admin_check(rule_text)
+    )
+
+
+def _inject_same_domain(rule_text, qualified=None):
+    """Append same_domain to a rule body.
+
+    :param qualified: If set, use this qualified name (e.g. neutron_lib.same_domain)
+        instead of bare same_domain. Required for policy files that have
+        their own package scope.
+    """
+    domain_ref = qualified or "same_domain"
+    if rule_text.rstrip().endswith("}"):
+        return rule_text.rstrip()[:-1] + "  " + domain_ref + "\n}"
+    return rule_text
+
+
 def generate_opa_policy(conf):
     """Generate a OPA policies.
 
@@ -259,12 +399,27 @@ def generate_opa_policy(conf):
     namespace = conf.namespace
     output_dir = conf.output_dir
     policy_file = conf.policy_file
+    persona_dir = getattr(conf, 'persona_dir', None)
     generate_policy_test: bool = True
     enforcer = common.get_enforcer(namespace)
+
+    # Load persona definitions for rich test generation
+    from oslo_policy_opa.generator import personas as personas_mod
+    from oslo_policy_opa.generator import target_attrs
+    personas = personas_mod.load_personas(namespace, persona_dir)
+
     # Ensure that files have been parsed
     if policy_file:
         enforcer.policy_file = policy_file
     enforcer.load_rules(force_reload=True)
+
+    # Introspect service for available target fields per resource
+    try:
+        target_attr_map = target_attrs.build_policy_target_map(namespace)
+        LOG.info("Loaded available target attributes for %s", namespace)
+    except Exception as e:
+        LOG.warning("Could not load target attributes for %s: %s", namespace, e)
+        target_attr_map = None
 
     file_rules = [
         policy.RuleDefault(name, default.check_str)
@@ -295,6 +450,8 @@ def generate_opa_policy(conf):
                 converted_rules,
                 namespace=namespace,
                 rule_operations=getattr(default_rule, "operations", None),
+                rule_metadata=default_rule,
+                target_attr_map=target_attr_map,
             )
 
         # Custom policy file may contain additional "library" rules referred by
@@ -312,6 +469,7 @@ def generate_opa_policy(conf):
                 converted_rules,
                 namespace=namespace,
                 rule_operations=None,
+                target_attr_map=target_attr_map,
             )
 
         # Another iteration over the rules to generate tests for rules while
@@ -329,14 +487,19 @@ def generate_opa_policy(conf):
                 opa_test_policies,
                 namespace=namespace,
                 rule_operations=getattr(default_rule, "operations", None),
+                personas=personas,
+                lib_pkg=f"{namespace}_lib",
             )
 
+    lib_pkg = f"{namespace}_lib"
     lib_output = None
     if output_dir:
         lib_fname = pathlib.Path(output_dir, namespace).with_suffix(".rego")
         lib_fname.parent.mkdir(parents=True, exist_ok=True)
         lib_output = open(lib_fname, "w") if output_dir else sys.stdout
-        lib_output.write("package lib\n\n")
+        lib_output.write(f"package {lib_pkg}\n\n")
+        if namespace != "keystone":
+            lib_output.write(_SAME_DOMAIN_BLOCK)
     for rule, opa_policy in opa_policies.items():
         LOG.info(f"Writing rule {rule}")
         if rule != "lib":
@@ -353,12 +516,28 @@ def generate_opa_policy(conf):
             output.write(
                 f"package {common.normalize_name(rule.replace(':', '.').replace('-', '_'))}\n\n"
             )
-            if "lib." in "".join(opa_policy):
-                output.write("import data.lib\n\n")
+            policy_text = "".join(opa_policy)
+            needs_lib_import = "lib." in policy_text
+            # Check if any inline rules need same_domain injection
+            if not needs_lib_import:
+                for pr in opa_policy:
+                    if _needs_same_domain(pr):
+                        needs_lib_import = True
+                        break
+            if needs_lib_import:
+                output.write(f"import data.{lib_pkg}\n\n")
             for opa_policy_rule in opa_policy:
                 if namespace == "glance":
                     opa_policy_rule = opa_policy_rule.replace(
                         "member_id", "member"
+                    )
+                # Replace lib. references with namespace-qualified package
+                opa_policy_rule = opa_policy_rule.replace("lib.", f"{lib_pkg}.")
+                # Inject same_domain into inline rules that need it.
+                # Keystone handles domain isolation natively in its API layer.
+                if namespace != "keystone" and _needs_same_domain(opa_policy_rule):
+                    opa_policy_rule = _inject_same_domain(
+                        opa_policy_rule, qualified=f"{lib_pkg}.same_domain"
                     )
                 output.write(opa_policy_rule)
                 output.write("\n")
@@ -390,10 +569,15 @@ def generate_opa_policy(conf):
                 if output != sys.stdout:
                     output.close()
         else:
-            # for opa_policy_rule in opa_policy:
             if lib_output:
                 for opa_policy_rule in opa_policy:
-                    lib_output.write(opa_policy_rule.replace("lib.", ""))
+                    rule_text = opa_policy_rule.replace("lib.", "")
+                    # Add same_domain to ownership checks and ungated
+                    # admin checks for domain isolation.
+                    # Keystone handles domain isolation natively.
+                    if namespace != "keystone" and _needs_same_domain(rule_text):
+                        rule_text = _inject_same_domain(rule_text)
+                    lib_output.write(rule_text)
                     lib_output.write("\n\n")
     if lib_output:
         lib_output.close()

@@ -1,19 +1,22 @@
-FROM python:3.11-slim
+ARG BASE_IMAGE
 
-ARG OS_RELEASE=2025.2
-ENV CONSTRAINTS_URL=https://releases.openstack.org/constraints/upper/${OS_RELEASE}
+FROM ${BASE_IMAGE}
 
-# Add build tools (gcc, etc.)
+USER root
+
+# The pf9-* images use a virtualenv at /var/lib/openstack
+ENV PIP=/var/lib/openstack/bin/pip3
+ENV PYTHON=/var/lib/openstack/bin/python3
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
-    libssl-dev \
   && rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install --upgrade pip
-RUN python -m pip install -c ${CONSTRAINTS_URL} \
-    keystone neutron cinder nova glance
+RUN ${PIP} install --upgrade pip
 
 WORKDIR /work
 COPY . /work
-RUN python -m pip install -e /work
+RUN ${PIP} install -e /work
+
+ENTRYPOINT ["/var/lib/openstack/bin/oslopolicy-opa-policy-generator"]

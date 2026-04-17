@@ -201,370 +201,12 @@ shared_subnetpools if {
 	input.target.shared
 }
 
-get_tap_flow if {
-	admin_or_owner
-}
-
-update_tap_mirror if {
-	# rule:admin_only
-	admin_only
-}
-
-update_tap_mirror if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-create_tap_flow if {
-	admin_or_owner
-}
-
-create_ikepolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-create_ikepolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-update_endpoint_group if {
-	# rule:admin_only
-	admin_only
-}
-
-update_endpoint_group if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-update_tap_flow if {
-	admin_or_owner
-}
-
-update_tap_service if {
-	admin_or_owner
-}
-
-create_ipsec_site_connection if {
-	# rule:admin_only
-	admin_only
-}
-
-create_ipsec_site_connection if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-global_admin if {
-	"admin" in input.credentials.roles
-	input.credentials.domain_id == "default"
-	same_domain
-}
-
 create_vpnservice if {
 	# rule:admin_only
 	admin_only
 }
 
 create_vpnservice if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-delete_endpoint_group if {
-	# rule:admin_only
-	admin_only
-}
-
-delete_endpoint_group if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-create_tap_mirror if {
-	# rule:admin_only
-	admin_only
-}
-
-create_tap_mirror if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-update_ipsecpolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-update_ipsecpolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-update_vpnservice if {
-	# rule:admin_only
-	admin_only
-}
-
-update_vpnservice if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-create_tap_service if {
-	admin_or_owner
-}
-
-create_ipsecpolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-create_ipsecpolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-delete_tap_service if {
-	admin_or_owner
-}
-
-get_tap_service if {
-	admin_or_owner
-}
-
-delete_ipsecpolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-delete_ipsecpolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-delete_ipsec_site_connection if {
-	# rule:admin_only
-	admin_only
-}
-
-delete_ipsec_site_connection if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-delete_tap_mirror if {
-	# rule:admin_only
-	admin_only
-}
-
-delete_tap_mirror if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-update_ikepolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-update_ikepolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-get_ikepolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-get_ikepolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-create_endpoint_group if {
-	# rule:admin_only
-	admin_only
-}
-
-create_endpoint_group if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-get_ipsecpolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-get_ipsecpolicy if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-delete_vpnservice if {
-	# rule:admin_only
-	admin_only
-}
-
-delete_vpnservice if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-get_ipsec_site_connection if {
-	# rule:admin_only
-	admin_only
-}
-
-get_ipsec_site_connection if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-update_ipsec_site_connection if {
-	# rule:admin_only
-	admin_only
-}
-
-update_ipsec_site_connection if {
-	member_and_creds_project_id_eq_input_project_id
-}
-
-# (role:member and project_id:%(project_id)s)
-member_and_creds_project_id_eq_input_project_id if {
-	"member" in input.credentials.roles
-	input.credentials.project_id == input.target.project_id
-	same_domain
-}
-
-delete_tap_flow if {
-	admin_or_owner
-}
-
-delete_ikepolicy if {
-	# rule:admin_only
-	admin_only
-}
-
-delete_ikepolicy if {
 	member_and_creds_project_id_eq_input_project_id
 }
 
@@ -591,12 +233,80 @@ reader_and_creds_project_id_eq_input_project_id if {
 	same_domain
 }
 
-get_vpnservice if {
+create_tap_service if {
+	admin_or_owner
+}
+
+delete_vpnservice if {
 	# rule:admin_only
 	admin_only
 }
 
-get_vpnservice if {
+delete_vpnservice if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+create_ikepolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+create_ikepolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+delete_ipsecpolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+delete_ipsecpolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+delete_ikepolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+delete_ikepolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+get_ikepolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+get_ikepolicy if {
 	member_and_creds_project_id_eq_input_project_id
 }
 
@@ -621,4 +331,294 @@ member_and_creds_project_id_eq_input_project_id if {
 	"member" in input.credentials.roles
 	input.credentials.project_id == input.target.project_id
 	same_domain
+}
+
+create_tap_mirror if {
+	# rule:admin_only
+	admin_only
+}
+
+create_tap_mirror if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+create_ipsecpolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+create_ipsecpolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+delete_tap_mirror if {
+	# rule:admin_only
+	admin_only
+}
+
+delete_tap_mirror if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+get_tap_flow if {
+	admin_or_owner
+}
+
+update_endpoint_group if {
+	# rule:admin_only
+	admin_only
+}
+
+update_endpoint_group if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+update_ipsec_site_connection if {
+	# rule:admin_only
+	admin_only
+}
+
+update_ipsec_site_connection if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+update_tap_mirror if {
+	# rule:admin_only
+	admin_only
+}
+
+update_tap_mirror if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+create_ipsec_site_connection if {
+	# rule:admin_only
+	admin_only
+}
+
+create_ipsec_site_connection if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+delete_ipsec_site_connection if {
+	# rule:admin_only
+	admin_only
+}
+
+delete_ipsec_site_connection if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+global_admin if {
+	"admin" in input.credentials.roles
+	input.credentials.domain_id == "default"
+	same_domain
+}
+
+delete_tap_service if {
+	admin_or_owner
+}
+
+update_ikepolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+update_ikepolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+get_tap_service if {
+	admin_or_owner
+}
+
+update_ipsecpolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+update_ipsecpolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+create_tap_flow if {
+	admin_or_owner
+}
+
+get_vpnservice if {
+	# rule:admin_only
+	admin_only
+}
+
+get_vpnservice if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+delete_endpoint_group if {
+	# rule:admin_only
+	admin_only
+}
+
+delete_endpoint_group if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+delete_tap_flow if {
+	admin_or_owner
+}
+
+get_ipsecpolicy if {
+	# rule:admin_only
+	admin_only
+}
+
+get_ipsecpolicy if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+create_endpoint_group if {
+	# rule:admin_only
+	admin_only
+}
+
+create_endpoint_group if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+update_tap_flow if {
+	admin_or_owner
+}
+
+update_vpnservice if {
+	# rule:admin_only
+	admin_only
+}
+
+update_vpnservice if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+get_ipsec_site_connection if {
+	# rule:admin_only
+	admin_only
+}
+
+get_ipsec_site_connection if {
+	member_and_creds_project_id_eq_input_project_id
+}
+
+# (role:member and project_id:%(project_id)s)
+member_and_creds_project_id_eq_input_project_id if {
+	"member" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	same_domain
+}
+
+update_tap_service if {
+	admin_or_owner
 }

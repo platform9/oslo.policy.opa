@@ -1,6 +1,6 @@
 -include .env
 
-OUTPUT_DIR ?= $(CURDIR)/opa_policies
+OUTPUT_DIR ?= $(CURDIR)/opa_out
 POLICY_DIR ?= $(CURDIR)/oslo_policies
 
 .PHONY: generate fmt clean

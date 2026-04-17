@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUTPUT_DIR="${1:-$ROOT/opa_policies}"
+OUTPUT_DIR="${1:-$ROOT/opa_out}"
 POLICY_DIR="${2:-$ROOT/oslo_policies}"
 
 # Service base images, set via .env

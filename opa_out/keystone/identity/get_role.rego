@@ -1,42 +1,30 @@
 package identity.get_role
 
-import data.lib
+import data.keystone_lib
 
 # Show role details.
 # GET  /v3/roles/{role_id}
 # HEAD  /v3/roles/{role_id}
 # Intended scope(s): system, domain, project
-#"identity:get_role": "(rule:admin_required or (role:reader and system_scope:all)) or (role:manager and rule:domain_managed_target_role)"
-
-
-allow if {
-  admin_required_or_reader_and_creds_system_scope_eq_all
-}
+# Target attrs: target.role.description, target.role.domain_id, target.role.extra, target.role.id, target.role.name
+# "identity:get_role": "rule:admin_required or (role:reader and system_scope:all)"
 
 allow if {
-  manager_and_domain_managed_target_role
+	is_domain_manager_and_is_domain_managed_role
 }
 
-#(role:reader and system_scope:all)
-reader_and_creds_system_scope_eq_all if {
-  "reader" in input.credentials.roles
-  input.credentials.system_scope == "all"
+allow if {
+	# rule:base_get_role
+	keystone_lib.base_get_role
 }
 
-#(rule:admin_required or (role:reader and system_scope:all))
-admin_required_or_reader_and_creds_system_scope_eq_all if {
-  #rule:admin_required
-lib.admin_required
+allow if {
+	# rule:admin_required
+	keystone_lib.admin_required
 }
 
-#(rule:admin_required or (role:reader and system_scope:all))
-admin_required_or_reader_and_creds_system_scope_eq_all if {
-  reader_and_creds_system_scope_eq_all
+# (rule:is_domain_manager and rule:is_domain_managed_role)
+is_domain_manager_and_is_domain_managed_role if {
+	keystone_lib.is_domain_manager
+	keystone_lib.is_domain_managed_role
 }
-
-#(role:manager and rule:domain_managed_target_role)
-manager_and_domain_managed_target_role if {
-  "manager" in input.credentials.roles
-  lib.domain_managed_target_role
-}
-

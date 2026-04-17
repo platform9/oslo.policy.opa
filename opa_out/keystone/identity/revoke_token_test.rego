@@ -2,6 +2,4 @@ package identity_revoke_token_test
 
 import data.identity.revoke_token
 
-test_admin_required_or_token_subject_0 if revoke_token.allow with input as {"credentials": {"roles": ["admin"]}}
-test_admin_required_or_token_subject_1 if revoke_token.allow with input as {"credentials": {"is_admin": 1}}
-test_admin_required_or_token_subject_2 if revoke_token.allow with input as {"credentials": {"user_id": "foo"}, "target": {"target": {"token": {"user_id": "foo"}}}}
+test_system_admin_0 if revoke_token.allow with input as {"credentials": {"user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": 1, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": [], "token": {"domain": {"id": "default"}, "project": {"domain": {"id": "default"}}}}, "target": {"domain_id": "domain-a", "target.domain_id": "domain-a", "target.user.domain_id": "domain-a", "target.project.domain_id": "domain-a", "target.project.id": "project-a", "target.group.domain_id": "domain-a", "user": {"domain_id": "domain-a"}, "project": {"id": "project-a", "domain_id": "domain-a"}, "group": {"domain_id": "domain-a"}, "domain": {"id": "domain-a"}, "target.token.user_id": "sys-admin-user", "target.token.user.domain.id": "domain-a"}}

@@ -1,13 +1,11 @@
 package volume_extension.type_create
 
-import data.lib
+import data.cinder_lib
 
 # Create volume type.
 # POST  /types
-#"volume_extension:type_create": "rule:admin_api"
-
+# "volume_extension:type_create": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

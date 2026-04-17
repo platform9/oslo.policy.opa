@@ -1,14 +1,13 @@
 package os_compute_api.servers.create.attach_network
 
-import data.lib
+import data.nova_lib
 
 # Create a server with the requested network attached  to it
 # POST  /servers
 # Intended scope(s): project
-#"os_compute_api:servers:create:attach_network": "rule:project_member_or_admin"
-
+# Target attrs: availability_zone, domain_id, project_id, user_id
+# "os_compute_api:servers:create:attach_network": "rule:project_member_or_admin"
 
 allow if {
-  lib.project_member_or_admin
+	nova_lib.project_member_or_admin
 }
-

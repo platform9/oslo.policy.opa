@@ -1,13 +1,11 @@
 package workers.cleanup
 
-import data.lib
+import data.cinder_lib
 
 # Clean up workers.
 # POST  /workers/cleanup
-#"workers:cleanup": "rule:admin_api"
-
+# "workers:cleanup": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

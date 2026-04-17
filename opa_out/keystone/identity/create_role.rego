@@ -1,14 +1,13 @@
 package identity.create_role
 
-import data.lib
+import data.keystone_lib
 
 # Create role.
 # POST  /v3/roles
 # Intended scope(s): system, project
-#"identity:create_role": "rule:admin_required"
-
+# Target attrs: target.role.description, target.role.domain_id, target.role.extra, target.role.id, target.role.name
+# "identity:create_role": "rule:admin_required"
 
 allow if {
-  lib.admin_required
+	keystone_lib.admin_required
 }
-

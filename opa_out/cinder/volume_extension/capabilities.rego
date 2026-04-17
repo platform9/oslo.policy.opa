@@ -1,13 +1,11 @@
 package volume_extension.capabilities
 
-import data.lib
+import data.cinder_lib
 
 # Show backend capabilities.
 # GET  /capabilities/{host_name}
-#"volume_extension:capabilities": "rule:admin_api"
-
+# "volume_extension:capabilities": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

@@ -1,35 +1,29 @@
 package identity.create_project
 
-import data.lib
+import data.keystone_lib
 
 # Create project.
 # POST  /v3/projects
 # Intended scope(s): system, domain, project
-#"identity:create_project": "(rule:admin_required) or (role:manager and domain_id:%(target.project.domain_id)s)"
-
-
-allow if {
-  #rule:admin_required
-lib.admin_required
-}
+# Target attrs: target.project.description, target.project.domain_id, target.project.enabled, target.project.extra, target.project.id, target.project.is_domain, target.project.name, target.project.parent_id
+# "identity:create_project": "rule:admin_required"
 
 allow if {
-  manager_and_creds_domain_id_eq_input_target_project_domain_id
+	is_domain_manager_and_creds_token_domain_id_eq_input_target_project_domain_id
 }
 
-#domain_id:%(target.project.domain_id)s
-creds_domain_id_eq_input_target_project_domain_id if {
-  input.credentials.domain_id == input.target.target.project.domain_id
+allow if {
+	# rule:base_create_project
+	keystone_lib.base_create_project
 }
 
-#domain_id:%(target.project.domain_id)s
-creds_domain_id_eq_input_target_project_domain_id if {
-  input.credentials.domain_id == input.target["target.project.domain_id"]
+allow if {
+	# rule:admin_required
+	keystone_lib.admin_required
 }
 
-#(role:manager and domain_id:%(target.project.domain_id)s)
-manager_and_creds_domain_id_eq_input_target_project_domain_id if {
-  "manager" in input.credentials.roles
-  creds_domain_id_eq_input_target_project_domain_id
+# (rule:is_domain_manager and token.domain.id:%(target.project.domain_id)s)
+is_domain_manager_and_creds_token_domain_id_eq_input_target_project_domain_id if {
+	keystone_lib.is_domain_manager
+	input.credentials.token.domain.id == input.target["target.project.domain_id"]
 }
-

@@ -1,14 +1,13 @@
 package update_flavor
 
-import data.lib
+import data.neutron_lib
 
 # Update a flavor
 # PUT  /flavors/{id}
 # Intended scope(s): project
-#"update_flavor": "rule:admin_only"
-
+# Target attrs: description, domain_id, enabled, id, name, service_profiles, service_type
+# "update_flavor": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

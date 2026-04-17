@@ -1,15 +1,14 @@
 package update_router.external_gateway_info.enable_snat
 
-import data.lib
+import data.neutron_lib
 
 # Update ``enable_snat`` attribute of ``external_gateway_info``
 # information of a router
 # PUT  /routers/{id}
 # Intended scope(s): project
-#"update_router:external_gateway_info:enable_snat": "rule:admin_only"
-
+# Target attrs: admin_state_up, availability_zone_hints, availability_zones, conntrack_helpers, distributed, domain_id, enable_default_route_bfd, enable_default_route_ecmp, enable_ndp_proxy, external_gateway_info, external_gateways, flavor_id, ha, id, name, routes, service_type_id, status, tenant_id
+# "update_router:external_gateway_info:enable_snat": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

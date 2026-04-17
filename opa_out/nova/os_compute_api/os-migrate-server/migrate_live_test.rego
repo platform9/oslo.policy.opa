@@ -2,5 +2,4 @@ package os_compute_api_os_migrate_server_migrate_live_test
 
 import data.os_compute_api.os_migrate_server.migrate_live
 
-test_migrate_live_0 if migrate_live.allow with input as {"credentials": {"roles": ["manager"], "project_id": "foo"}, "target": {"project_id": "foo"}}
-test_migrate_live_1 if migrate_live.allow with input as {"credentials": {"roles": ["admin"]}}
+test_system_admin_0 if migrate_live.allow with input as {"credentials": {"project_id": "sys-project-1", "user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": true, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": []}, "target": {"project_id": "project-a", "domain_id": "domain-a"}}

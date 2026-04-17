@@ -1,31 +1,31 @@
 package get_policy.tags
 
-import data.lib
+import data.neutron_lib
 
 # Get QoS policy tags
 # GET  /qos/policies/{id}/tags
 # GET  /qos/policies/{id}/tags/{tag_id}
 # Intended scope(s): project
-#"get_policy:tags": "(rule:admin_only) or (role:reader and project_id:%(project_id)s) or rule:shared_qos_policy"
-
+# Target attrs: domain_id, id, is_default, name, rules, shared, tenant_id
+# "get_policy:tags": "(rule:admin_only) or (role:reader and project_id:%(project_id)s) or rule:shared_qos_policy"
 
 allow if {
-  #rule:admin_only
-lib.admin_only
+	# rule:admin_only
+	neutron_lib.admin_only
 }
 
 allow if {
-  reader_and_creds_project_id_eq_input_project_id
+	reader_and_creds_project_id_eq_input_project_id
 }
 
 allow if {
-  #rule:shared_qos_policy
-lib.shared_qos_policy
+	# rule:shared_qos_policy
+	neutron_lib.shared_qos_policy
 }
 
-#(role:reader and project_id:%(project_id)s)
+# (role:reader and project_id:%(project_id)s)
 reader_and_creds_project_id_eq_input_project_id if {
-  "reader" in input.credentials.roles
-  input.credentials.project_id == input.target.project_id
+	"reader" in input.credentials.roles
+	input.credentials.project_id == input.target.project_id
+	neutron_lib.same_domain
 }
-

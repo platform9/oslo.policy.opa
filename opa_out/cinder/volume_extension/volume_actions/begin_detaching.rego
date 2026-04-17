@@ -1,13 +1,11 @@
 package volume_extension.volume_actions.begin_detaching
 
-import data.lib
+import data.cinder_lib
 
 # Begin detach volumes.
 # POST  /volumes/{volume_id}/action (os-begin_detaching)
-#"volume_extension:volume_actions:begin_detaching": "rule:xena_system_admin_or_project_member"
-
+# "volume_extension:volume_actions:begin_detaching": "rule:xena_system_admin_or_project_member"
 
 allow if {
-  lib.xena_system_admin_or_project_member
+	cinder_lib.xena_system_admin_or_project_member
 }
-

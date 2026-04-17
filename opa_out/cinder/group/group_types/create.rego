@@ -1,13 +1,12 @@
 package group.group_types.create
 
-import data.lib
+import data.cinder_lib
 
 # Create a group type.
 # POST  /group_types/
-#"group:group_types:create": "rule:admin_api"
-
+# Target attrs: domain_id, project_id, user_id
+# "group:group_types:create": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

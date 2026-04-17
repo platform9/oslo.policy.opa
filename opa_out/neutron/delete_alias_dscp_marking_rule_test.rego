@@ -2,5 +2,5 @@ package delete_alias_dscp_marking_rule_test
 
 import data.delete_alias_dscp_marking_rule
 
-test_admin_only_or_manager_and_ext_parent_owner_0 if delete_alias_dscp_marking_rule.allow with input as {"credentials": {"roles": ["admin"]}}
-test_admin_only_or_manager_and_ext_parent_owner_1 if delete_alias_dscp_marking_rule.allow with input as {"credentials": {"roles": ["manager"]}}
+test_system_admin_0 if delete_alias_dscp_marking_rule.allow with input as {"credentials": {"tenant_id": "sys-project-1", "project_id": "sys-project-1", "user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": true, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": []}, "target": {"tenant_id": "project-a", "project_id": "project-a", "domain_id": "domain-a", "ext_parent_policy_id": "qos-policy-1", "ext_parent:tenant_id": "project-a", "ext_parent_policy:tenant_id": "project-a"}}
+test_project_manager_1 if delete_alias_dscp_marking_rule.allow with input as {"credentials": {"tenant_id": "project-a", "project_id": "project-a", "user_id": "manager-user-1", "user_domain_id": "domain-a", "project_domain_id": "domain-a", "is_admin": false, "is_admin_project": false, "roles": ["manager", "member"], "service_roles": []}, "target": {"tenant_id": "project-a", "project_id": "project-a", "domain_id": "domain-a", "ext_parent_policy_id": "qos-policy-1", "ext_parent:tenant_id": "project-a", "ext_parent_policy:tenant_id": "project-a"}}

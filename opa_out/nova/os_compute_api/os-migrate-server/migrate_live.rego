@@ -1,15 +1,12 @@
 package os_compute_api.os_migrate_server.migrate_live
 
-import data.lib
+import data.nova_lib
 
-# Live migrate a server to a new host without a reboot without
-# specifying a host.
+# Live migrate a server to a new host without a reboot
 # POST  /servers/{server_id}/action (os-migrateLive)
 # Intended scope(s): project
-#"os_compute_api:os-migrate-server:migrate_live": "rule:project_manager_or_admin"
-
+# "os_compute_api:os-migrate-server:migrate_live": "rule:context_is_admin"
 
 allow if {
-  lib.project_manager_or_admin
+	nova_lib.context_is_admin
 }
-

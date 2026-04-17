@@ -4,10 +4,9 @@ package get_flavor
 # GET  /flavors
 # GET  /flavors/{id}
 # Intended scope(s): project
-#"get_flavor": "role:reader"
-
+# Target attrs: description, domain_id, enabled, id, name, service_profiles, service_type
+# "get_flavor": "role:reader"
 
 allow if {
-  "reader" in input.credentials.roles
+	"reader" in input.credentials.roles
 }
-

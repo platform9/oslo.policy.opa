@@ -1,14 +1,19 @@
 package activate
 
-import data.lib
+import data.neutron_lib
 
 # Activate port binding on the host
 # PUT  /ports/{port_id}/bindings/{host}
 # Intended scope(s): project
-#"activate": "rule:service_api"
-
+# "activate": "rule:service_api"
 
 allow if {
-  lib.service_api
+	# role:admin
+	"admin" in input.credentials.roles
+	neutron_lib.same_domain
 }
 
+allow if {
+	# role:service
+	"service" in input.credentials.roles
+}

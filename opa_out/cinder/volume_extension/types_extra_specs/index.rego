@@ -1,13 +1,11 @@
 package volume_extension.types_extra_specs.index
 
-import data.lib
+import data.cinder_lib
 
 # List type extra specs.
 # GET  /types/{type_id}/extra_specs
-#"volume_extension:types_extra_specs:index": "rule:xena_system_admin_or_project_reader"
-
+# "volume_extension:types_extra_specs:index": "rule:xena_system_admin_or_project_reader"
 
 allow if {
-  lib.xena_system_admin_or_project_reader
+	cinder_lib.xena_system_admin_or_project_reader
 }
-

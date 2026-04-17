@@ -1,26 +1,26 @@
 package get_floatingip_port_forwarding
 
-import data.lib
+import data.neutron_lib
 
 # Get a floating IP port forwarding
 # GET  /floatingips/{floatingip_id}/port_forwardings
 # GET  /floatingips/{floatingip_id}/port_forwardings/{port_forwarding_id}
 # Intended scope(s): project
-#"get_floatingip_port_forwarding": "(rule:admin_only) or (role:reader and rule:ext_parent_owner)"
-
+# Target attrs: distributed, dns_domain, dns_name, domain_id, fixed_ip_address, floating_ip_address, floating_network_id, id, port_details, port_forwardings, port_id, qos_network_policy_id, qos_policy_id, router_id, status, tenant_id
+# "get_floatingip_port_forwarding": "(rule:admin_only) or (role:reader and rule:ext_parent_owner)"
 
 allow if {
-  #rule:admin_only
-lib.admin_only
+	# rule:admin_only
+	neutron_lib.admin_only
 }
 
 allow if {
-  reader_and_tenant_id_
+	reader_and_tenant_id_
 }
 
-#(role:reader and tenant_id:%(ext_parent_floatingip:tenant_id)s)
+# (role:reader and tenant_id:%(ext_parent_floatingip:tenant_id)s)
 reader_and_tenant_id_ if {
-  "reader" in input.credentials.roles
-  lib.get_floatingip(input.target.ext_parent_floatingip_id).tenant_id == input.credentials.tenant_id
+	"reader" in input.credentials.roles
+	input.target["ext_parent:tenant_id"] == input.credentials.tenant_id
+	neutron_lib.same_domain
 }
-

@@ -1,51 +1,51 @@
 package get_subnet
 
-import data.lib
+import data.neutron_lib
 
 # Get a subnet
 # GET  /subnets
 # GET  /subnets/{id}
 # Intended scope(s): project
-#"get_subnet": "role:reader and project_id:%(project_id)s or rule:shared or rule:external_network or (rule:admin_only) or (role:reader and rule:network_owner) or rule:service_api"
-
-
-allow if {
-  reader_and_creds_project_id_eq_input_project_id
-}
+# Target attrs: allocation_pools, cidr, dns_nameservers, dns_publish_fixed_ip, domain_id, enable_dhcp, gateway_ip, host_routes, id, ip_version, ipv6_address_mode, ipv6_ra_mode, name, network:tenant_id, network_id, networks:shared, router:external, segment_id, service_types, subnetpool_id, tenant_id
+# "get_subnet": "role:reader and project_id:%(project_id)s or rule:shared or rule:external_network or (rule:admin_only) or (role:reader and rule:network_owner)"
 
 allow if {
-  #rule:shared
-lib.shared
+	# rule:global_admin
+	neutron_lib.global_admin
 }
 
 allow if {
-  #rule:external_network
-lib.external_network
+	# rule:context_is_admin
+	neutron_lib.context_is_admin
 }
 
 allow if {
-  #rule:admin_only
-lib.admin_only
+	owner_or_network_owner
 }
 
 allow if {
-  reader_and_network_owner
+	external_and_context_is_admin
 }
 
 allow if {
-  #rule:service_api
-lib.service_api
+	# role:service
+	"service" in input.credentials.roles
 }
 
-#(role:reader and project_id:%(project_id)s)
-reader_and_creds_project_id_eq_input_project_id if {
-  "reader" in input.credentials.roles
-  input.credentials.project_id == input.target.project_id
+# (rule:owner or rule:network_owner)
+owner_or_network_owner if {
+	# rule:owner
+	neutron_lib.owner
 }
 
-#(role:reader and rule:network_owner)
-reader_and_network_owner if {
-  "reader" in input.credentials.roles
-  lib.network_owner
+# (rule:owner or rule:network_owner)
+owner_or_network_owner if {
+	# rule:network_owner
+	neutron_lib.network_owner
 }
 
+# (rule:external and rule:context_is_admin)
+external_and_context_is_admin if {
+	neutron_lib.external
+	neutron_lib.context_is_admin
+}

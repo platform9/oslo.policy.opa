@@ -1,13 +1,12 @@
 package clusters.update
 
-import data.lib
+import data.cinder_lib
 
 # Update cluster.
 # PUT  /clusters/{cluster_id}
-#"clusters:update": "rule:admin_api"
-
+# Target attrs: domain_id, project_id, user_id
+# "clusters:update": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

@@ -1,14 +1,12 @@
 package identity.update_identity_provider
 
-import data.lib
+import data.keystone_lib
 
 # Update identity provider.
 # PATCH  /v3/OS-FEDERATION/identity_providers/{idp_id}
 # Intended scope(s): system, project
-#"identity:update_identity_provider": "rule:admin_required"
-
+# "identity:update_identity_provider": "rule:admin_required"
 
 allow if {
-  lib.admin_required
+	keystone_lib.admin_required
 }
-

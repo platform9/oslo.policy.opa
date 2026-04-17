@@ -1,6 +1,6 @@
 package os_compute_api.servers.show.host_status.unknown_only
 
-import data.lib
+import data.nova_lib
 
 # Show a server with additional host status information, only if host
 # status is UNKNOWN.
@@ -17,10 +17,9 @@ import data.lib
 # PUT  /servers/{server_id}
 # POST  /servers/{server_id}/action (rebuild)
 # Intended scope(s): project
-#"os_compute_api:servers:show:host_status:unknown-only": "rule:context_is_admin"
-
+# Target attrs: availability_zone, domain_id, project_id, user_id
+# "os_compute_api:servers:show:host_status:unknown-only": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

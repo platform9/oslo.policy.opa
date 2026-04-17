@@ -1,14 +1,13 @@
 package update_subnetpool.is_dflt
 
-import data.lib
+import data.neutron_lib
 
 # Update ``is_default`` attribute of a subnetpool
 # PUT  /subnetpools/{id}
 # Intended scope(s): project
-#"update_subnetpool:is_default": "rule:admin_only"
-
+# Target attrs: address_scope_id, default_prefixlen, default_quota, domain_id, id, ip_version, is_default, max_prefixlen, min_prefixlen, name, prefixes, shared, tenant_id
+# "update_subnetpool:is_default": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

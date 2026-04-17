@@ -6,10 +6,8 @@ package compute.servers.resize.cross_cell
 # the default preferred behavior even if this is enabled.
 # POST  /servers/{server_id}/action (resize)
 # Intended scope(s): project
-#"compute:servers:resize:cross_cell": "!"
-
+# "compute:servers:resize:cross_cell": "!"
 
 allow if {
-  false
+	false
 }
-

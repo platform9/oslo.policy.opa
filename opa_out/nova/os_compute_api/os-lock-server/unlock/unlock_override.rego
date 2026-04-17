@@ -1,6 +1,6 @@
 package os_compute_api.os_lock_server.unlock.unlock_override
 
-import data.lib
+import data.nova_lib
 
 # Unlock a server, regardless who locked the server.
 #
@@ -8,10 +8,8 @@ import data.lib
 # server:unlock passes
 # POST  /servers/{server_id}/action (unlock)
 # Intended scope(s): project
-#"os_compute_api:os-lock-server:unlock:unlock_override": "rule:context_is_admin"
-
+# "os_compute_api:os-lock-server:unlock:unlock_override": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

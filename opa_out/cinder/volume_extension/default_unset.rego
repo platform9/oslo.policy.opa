@@ -1,13 +1,11 @@
 package volume_extension.dflt_unset
 
-import data.lib
+import data.cinder_lib
 
 # Unset default type.
 # DELETE  /default-types/{project-id}
-#"volume_extension:default_unset": "rule:admin_api"
-
+# "volume_extension:default_unset": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

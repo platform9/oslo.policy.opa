@@ -1,6 +1,6 @@
 package os_compute_api.os_extended_server_attributes
 
-import data.lib
+import data.nova_lib
 
 # Return extended attributes for server.
 #
@@ -31,10 +31,8 @@ import data.lib
 # PUT  /servers/{server_id}
 # POST  /servers/{server_id}/action (rebuild)
 # Intended scope(s): project
-#"os_compute_api:os-extended-server-attributes": "rule:context_is_admin"
-
+# "os_compute_api:os-extended-server-attributes": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

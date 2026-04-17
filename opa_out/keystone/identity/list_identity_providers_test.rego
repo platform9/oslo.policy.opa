@@ -2,6 +2,5 @@ package identity_list_identity_providers_test
 
 import data.identity.list_identity_providers
 
-test_admin_required_or_reader_and_creds_system_scope_eq_all_0 if list_identity_providers.allow with input as {"credentials": {"roles": ["admin"]}}
-test_admin_required_or_reader_and_creds_system_scope_eq_all_1 if list_identity_providers.allow with input as {"credentials": {"is_admin": 1}}
-test_admin_required_or_reader_and_creds_system_scope_eq_all_2 if list_identity_providers.allow with input as {"credentials": {"roles": ["reader"], "system_scope": "all"}}
+test_system_admin_0 if list_identity_providers.allow with input as {"credentials": {"user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": 1, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": [], "token": {"domain": {"id": "default"}, "project": {"domain": {"id": "default"}}}}, "target": {"domain_id": "domain-a", "target.domain_id": "domain-a", "target.user.domain_id": "domain-a", "target.project.domain_id": "domain-a", "target.project.id": "project-a", "target.group.domain_id": "domain-a", "user": {"domain_id": "domain-a"}, "project": {"id": "project-a", "domain_id": "domain-a"}, "group": {"domain_id": "domain-a"}, "domain": {"id": "domain-a"}}}
+test_deny_wrong_role_1 if not list_identity_providers.allow with input as {"credentials": {"project_id": "project-c", "user_id": "norole-user", "user_domain_id": "domain-a", "project_domain_id": "domain-a", "is_admin": 0, "is_admin_project": false, "roles": [], "service_roles": [], "token": {"project": {"domain": {"id": "domain-a"}}}}, "target": {"domain_id": "domain-a"}}

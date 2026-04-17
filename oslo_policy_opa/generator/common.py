@@ -83,6 +83,48 @@ def deep_dict_set(path_parts: list[str], val) -> dict[str, typing.Any]:
     return result
 
 
+DOMAIN_ID_PLACEHOLDER = "test-domain-id"
+
+
+def enrich_test_data_with_domain(test_data):
+    """Add domain context fields to test data for domain isolation.
+
+    When test data contains credentials with project_id, add
+    project_domain_id. When target contains project_id or tenant_id,
+    add domain_id. This ensures generated tests work with domain_gate
+    checks in rego lib helpers.
+    """
+    inp = test_data.get("input", {})
+
+    creds = inp.get("credentials", {})
+    has_project_scope = creds.get("project_id") or creds.get("tenant_id")
+    if has_project_scope and "project_domain_id" not in creds:
+        creds["project_domain_id"] = DOMAIN_ID_PLACEHOLDER
+
+    # Admin-only tests need system_scope to pass domain_gate
+    is_admin = (
+        "admin" in creds.get("roles", [])
+        or creds.get("is_admin")
+        or creds.get("is_admin_project")
+    )
+    if is_admin and not has_project_scope and "system_scope" not in creds:
+        creds["system_scope"] = "all"
+
+    target = inp.get("target", {})
+    if target and "domain_id" not in target:
+        # Check for direct ownership keys
+        has_ownership = target.get("project_id") or target.get("tenant_id")
+        # Check for parent resource ownership keys used by Neutron
+        if not has_ownership:
+            has_ownership = any(
+                k.endswith(":tenant_id") for k in target
+            )
+        if has_ownership:
+            target["domain_id"] = DOMAIN_ID_PLACEHOLDER
+
+    return test_data
+
+
 def deep_merge_dicts(dict1, dict2):
     """
     Recursively merge two dictionaries.

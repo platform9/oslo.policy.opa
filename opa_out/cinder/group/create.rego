@@ -1,13 +1,12 @@
 package group.create
 
-import data.lib
+import data.cinder_lib
 
 # Create group.
 # POST  /groups
-#"group:create": "rule:xena_system_admin_or_project_member"
-
+# Target attrs: domain_id, project_id, user_id
+# "group:create": "rule:xena_system_admin_or_project_member"
 
 allow if {
-  lib.xena_system_admin_or_project_member
+	cinder_lib.xena_system_admin_or_project_member
 }
-

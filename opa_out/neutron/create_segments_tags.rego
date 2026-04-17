@@ -1,14 +1,12 @@
 package create_segments_tags
 
-import data.lib
+import data.neutron_lib
 
 # Create the segment tags
 # POST  /segments/{id}/tags
 # Intended scope(s): project
-#"create_segments_tags": "rule:admin_only"
-
+# "create_segments_tags": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

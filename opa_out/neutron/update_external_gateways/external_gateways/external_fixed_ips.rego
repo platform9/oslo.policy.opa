@@ -1,14 +1,12 @@
 package update_external_gateways.external_gateways.external_fixed_ips
 
-import data.lib
+import data.neutron_lib
 
 # Update router external gateways fixed IPs
 # PUT  /routers/{id}
 # Intended scope(s): project
-#"update_external_gateways:external_gateways:external_fixed_ips": "rule:admin_only"
-
+# "update_external_gateways:external_gateways:external_fixed_ips": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

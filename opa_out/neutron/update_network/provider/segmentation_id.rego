@@ -1,14 +1,13 @@
 package update_network.provider.segmentation_id
 
-import data.lib
+import data.neutron_lib
 
 # Update ``provider:segmentation_id`` attribute of a network
 # PUT  /networks/{id}
 # Intended scope(s): project
-#"update_network:provider:segmentation_id": "rule:admin_only"
-
+# Target attrs: admin_state_up, availability_zone_hints, availability_zones, dns_domain, domain_id, id, ipv4_address_scope, ipv6_address_scope, is_default, l2_adjacency, mtu, name, port_security_enabled, project_default, provider:network_type, provider:physical_network, provider:segmentation_id, qinq, qos_policy_id, router:external, segments, shared, status, subnets, tenant_id, vlan_transparent
+# "update_network:provider:segmentation_id": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

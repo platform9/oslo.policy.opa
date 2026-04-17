@@ -7,10 +7,6 @@ package identity.get_security_compliance_domain_config
 # GET  /v3/domains/{domain_id}/config/security_compliance/{option}
 # HEAD  /v3/domains/{domain_id}/config/security_compliance/{option}
 # Intended scope(s): system, domain, project
-#"identity:get_security_compliance_domain_config": ""
+# "identity:get_security_compliance_domain_config": ""
 
-
-allow if {
-  
-}
-
+allow if {}

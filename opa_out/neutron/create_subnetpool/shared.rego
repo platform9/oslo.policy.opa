@@ -1,14 +1,13 @@
 package create_subnetpool.shared
 
-import data.lib
+import data.neutron_lib
 
 # Create a shared subnetpool
 # POST  /subnetpools
 # Intended scope(s): project
-#"create_subnetpool:shared": "rule:admin_only"
-
+# Target attrs: address_scope_id, default_prefixlen, default_quota, domain_id, id, ip_version, is_default, max_prefixlen, min_prefixlen, name, prefixes, shared, tenant_id
+# "create_subnetpool:shared": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

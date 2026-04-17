@@ -1,14 +1,12 @@
 package snapshot_extension.list_manageable
 
-import data.lib
+import data.cinder_lib
 
 # List (in detail) of snapshots which are available to manage.
 # GET  /manageable_snapshots
 # GET  /manageable_snapshots/detail
-#"snapshot_extension:list_manageable": "rule:admin_api"
-
+# "snapshot_extension:list_manageable": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

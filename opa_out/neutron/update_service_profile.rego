@@ -1,14 +1,13 @@
 package update_service_profile
 
-import data.lib
+import data.neutron_lib
 
 # Update a service profile
 # PUT  /service_profiles/{id}
 # Intended scope(s): project
-#"update_service_profile": "rule:admin_only"
-
+# Target attrs: description, domain_id, driver, enabled, id, metainfo
+# "update_service_profile": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

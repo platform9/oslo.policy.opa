@@ -1,14 +1,13 @@
 package delete_flavor
 
-import data.lib
+import data.neutron_lib
 
 # Delete a flavor
 # DELETE  /flavors/{id}
 # Intended scope(s): project
-#"delete_flavor": "rule:admin_only"
-
+# Target attrs: description, domain_id, enabled, id, name, service_profiles, service_type
+# "delete_flavor": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

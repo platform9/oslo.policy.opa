@@ -4,10 +4,6 @@ package identity.list_limits
 # GET  /v3/limits
 # HEAD  /v3/limits
 # Intended scope(s): system, domain, project
-#"identity:list_limits": ""
+# "identity:list_limits": ""
 
-
-allow if {
-  
-}
-
+allow if {}

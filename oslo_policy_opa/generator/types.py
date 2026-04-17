@@ -18,54 +18,17 @@ import typing
 
 import oslo_policy
 
+from oslo_policy_opa.generator import common as gen_common
+
 from oslo_serialization import jsonutils
 
 from oslo_policy_opa.generator import common
 
 LOG = logging.getLogger(__name__)
 
-GET_FUNCTIONS: dict[str, str] = {
-    "floatingip": (
-        "get_floatingip(id) := net if {"
-        "net := http.send({"
-        '  "url": concat("/", ["http://localhost:9098/floatingip", id]),'
-        '  "method": "get",'
-        '  "timeout": "1s",'
-        '  "cache": true'
-        "}).body"
-        "}"
-    ),
-    "network": (
-        "get_network(id) := net if {"
-        "net := http.send({"
-        '  "url": concat("/", ["http://localhost:9098/network", id]),'
-        '  "method": "get",'
-        '  "timeout": "1s",'
-        '  "cache": true'
-        "}).body"
-        "}"
-    ),
-    "policy": (
-        "get_policy(id) := net if {"
-        "net := http.send({"
-        '  "url": concat("/", ["http://localhost:9098/policy", id]),'
-        '  "method": "get",'
-        '  "timeout": "1s",'
-        '  "cache": true'
-        "}).body"
-        "}"
-    ),
-    "security_group": (
-        "get_security_group(id) := net if {"
-        "net := http.send({"
-        '  "url": concat("/", ["http://localhost:9098/security_group", id]),'
-        '  "method": "get",'
-        '  "timeout": "1s",'
-        '  "cache": true'
-        "}).body"
-        "}"
-    ),
-}
+## http.send GET_FUNCTIONS removed -- pf9-watchman C++ engine does not
+## support http.send or concat builtins. Parent resource data is
+## pre-fetched by the Python _enrich_target function instead.
 
 
 class BaseOpaCheck:
@@ -191,7 +154,7 @@ class AndCheck(BaseOpaCheck):
                         incremental_rule_name, []
                     ).extend(
                         [
-                            f"#{rule}\n{incremental_rule_name} if {{\n  {part}\n}}"
+                            f"# {rule}\n{incremental_rule_name} if {{\n  {part}\n}}"
                             for part in opa_rule_repr
                         ]
                     )
@@ -209,7 +172,7 @@ class AndCheck(BaseOpaCheck):
                     res = global_results.setdefault(incremental_rule_name, [])
                     for subrule in opa_rule_repr:
                         res.append(
-                            f"#{rule}\n{incremental_rule_name} if {{\n  {subrule}\n}}"
+                            f"# {rule}\n{incremental_rule_name} if {{\n  {subrule}\n}}"
                         )
             else:
                 incremental_rule_name = rule.get_opa_incremental_rule_name()
@@ -219,7 +182,7 @@ class AndCheck(BaseOpaCheck):
                     global_results.setdefault(
                         incremental_rule_name, []
                     ).append(
-                        f"#{rule}\n{incremental_rule_name} if {{\n  {subrules}\n}}"
+                        f"# {rule}\n{incremental_rule_name} if {{\n  {subrules}\n}}"
                     )
 
         return ["\n  ".join(results)]
@@ -241,6 +204,7 @@ class AndCheck(BaseOpaCheck):
             rule_name = self.get_opa_incremental_rule_name()
             test_datas = self.get_opa_policy_test_data(rules, oslo_rule_name)
             for i, test_data in enumerate(test_datas):
+                gen_common.enrich_test_data_with_domain(test_data)
                 with_parts = []
                 for data_key, data_val in test_data.items():
                     with_parts.append(
@@ -303,7 +267,7 @@ class OrCheck(BaseOpaCheck):
             opa_rule_repr = rule.get_opa_policy(global_results)
             # AndCheck returns single string
             if len(opa_rule_repr) == 1 and not isinstance(rule, AndCheck):
-                results.append(f"#{rule}\n{opa_rule_repr[0]}")
+                results.append(f"# {rule}\n{opa_rule_repr[0]}")
 
             elif isinstance(rule, OrCheck):
                 # For OrCheck results we need to produce multiple entries for every OR part
@@ -314,7 +278,7 @@ class OrCheck(BaseOpaCheck):
                         incremental_rule_name, []
                     ).extend(
                         [
-                            f"#{rule}\n{incremental_rule_name} if {{\n  {part}\n}}"
+                            f"# {rule}\n{incremental_rule_name} if {{\n  {part}\n}}"
                             for part in opa_rule_repr
                         ]
                     )
@@ -329,7 +293,7 @@ class OrCheck(BaseOpaCheck):
                     )
                     for subrule in opa_rule_repr:
                         global_res.append(
-                            f"#{rule}\n{incremental_rule_name} if {{\n  {subrule}\n}}"
+                            f"# {rule}\n{incremental_rule_name} if {{\n  {subrule}\n}}"
                         )
         return results
 
@@ -352,6 +316,7 @@ class OrCheck(BaseOpaCheck):
             rule_name = self.get_opa_incremental_rule_name()
             test_datas = self.get_opa_policy_test_data(rules, oslo_rule_name)
             for i, test_data in enumerate(test_datas):
+                gen_common.enrich_test_data_with_domain(test_data)
                 with_parts = []
                 for data_key, data_val in test_data.items():
                     with_parts.append(
@@ -371,7 +336,11 @@ class OrCheck(BaseOpaCheck):
         tests: list[typing.Any] = []
         for rule in self.rules:
             rule_name = rule.get_opa_incremental_rule_name()
-            tests.extend(rule.get_opa_policy_test_data(rules, rule_name))
+            for td in rule.get_opa_policy_test_data(rules, rule_name):
+                # Skip empty test data from unresolvable rules
+                inp = td.get("input", {})
+                if inp:
+                    tests.append(td)
 
         return tests
 
@@ -401,7 +370,11 @@ class RoleCheck(BaseOpaCheck):
         rule_name: str,
         reverse: bool = False,
     ) -> list[dict]:
-        return [{"input": {"credentials": {"roles": [self.check.match]}}}]
+        creds = {"roles": [self.check.match]}
+        # Admin role tests need system_scope to pass domain_gate
+        if self.check.match == "admin":
+            creds["system_scope"] = "all"
+        return [{"input": {"credentials": creds}}]
 
 
 class RuleCheck(BaseOpaCheck):
@@ -411,11 +384,7 @@ class RuleCheck(BaseOpaCheck):
     def get_opa_policy(
         self, global_results: dict[str, list[str]]
     ) -> list[str]:
-        rule_name = (
-            common.normalize_name(self.check.match)
-            if self.check.match != "default"
-            else "_default"
-        )
+        rule_name = common.normalize_name(self.check.match)
         return [f"lib.{rule_name}"]
 
     def get_opa_incremental_rule_name(self) -> str:
@@ -436,6 +405,7 @@ class RuleCheck(BaseOpaCheck):
                 )
                 if test_datas:
                     for i, test_data in enumerate(test_datas):
+                        gen_common.enrich_test_data_with_domain(test_data)
                         with_parts = []
                         for data_key, data_val in test_data.items():
                             with_parts.append(
@@ -483,21 +453,26 @@ class GenericCheck(BaseOpaCheck):
     def __init__(self, oslo_policy_check: oslo_policy._checks.GenericCheck):
         super().__init__(oslo_policy_check)
 
+    @staticmethod
+    def _target_ref(path):
+        """Build rego reference for a target dict key.
+
+        Bracket notation for dotted/colon keys (flat dict lookup),
+        dot notation for simple keys.
+        """
+        if "." in path or ":" in path:
+            return f'input.target["{path}"]'
+        return f"input.target.{path}"
+
     def get_opa_policy(
         self, global_results: dict[str, list[str]]
     ) -> list[str]:
         right: str = self.check.match
-        right_path: typing.Optional[str] = None
         checks: list[str] = []
         if right.startswith("%(") and right.endswith(")s"):
             right_path = right[2:-2]
-            if ":" in right_path:
-                right = f'input.target["{right_path}"]'
-            else:
-                right = f"input.target.{right_path}"
+            right = self._target_ref(right_path)
         else:
-            # This is a string so we need to figure out what is it: a string,
-            # an int, bool, None, ...
             try:
                 right = ast.literal_eval(right)
                 if isinstance(right, str):
@@ -512,28 +487,12 @@ class GenericCheck(BaseOpaCheck):
                 else:
                     left = "not "
                 checks.append(f"{left}{right}")
-                if right_path:
-                    if "." in right_path:
-                        checks.append(f'{left}input.target["{right_path}"]')
             elif isinstance(left, int):
                 checks.append(f"{left} == {right}")
-                if right_path:
-                    if "." in right_path:
-                        checks.append(
-                            f'{left} == input.target["{right_path}"]'
-                        )
             elif isinstance(left, str):
                 checks.append(f'"{left}" == {right}')
-                if right_path:
-                    if "." in right_path:
-                        checks.append(
-                            f'"{left}" == input.target["{right_path}"]'
-                        )
             elif left is None:
                 checks.append(f"is_null({right})")
-                if right_path:
-                    if "." in right_path:
-                        checks.append(f'is_null(input.target["{right_path}"])')
             else:
                 raise NotImplementedError(
                     f"translation of {self.check.kind} is not supported yet"
@@ -550,11 +509,6 @@ class GenericCheck(BaseOpaCheck):
                 checks.append(
                     f"input.credentials.{self.check.kind} == {right}"
                 )
-                if right_path:
-                    if "." in right_path:
-                        checks.append(
-                            f'input.credentials.{self.check.kind} == input.target["{right_path}"]'
-                        )
         return checks
 
     def get_opa_incremental_rule_name(self) -> str:
@@ -671,7 +625,11 @@ class NeutronOwnerCheck(BaseOpaCheck):
     Matches look like:
 
         - tenant:%(tenant_id)s
+        - tenant_id:%(network:tenant_id)s
 
+    For pf9-watchman: parent resource data is pre-fetched by the Python
+    _enrich_target function, so we emit direct target field comparisons
+    instead of http.send calls.
     """
 
     def __init__(self, oslo_policy_check: oslo_policy._checks.GenericCheck):
@@ -683,25 +641,19 @@ class NeutronOwnerCheck(BaseOpaCheck):
     ) -> list[str]:
         try:
             if ":" in self.target_field:
-                res, field = self.target_field.split(":")
-                res_field = f"{res}_id"
-                if res.startswith("ext_parent_"):
-                    res = res[11:]
-                if res != "ext_parent" and res in GET_FUNCTIONS:
-                    global_results.setdefault("lib", []).append(
-                        GET_FUNCTIONS[res]
-                    )
-                    return [
-                        f"lib.get_{res}(input.target.{res_field}).{field} == input.credentials.{self.check.kind}"
-                    ]
-                else:
-                    return [
-                        f"# not yet implemented owner check {self.check} {self.target_field}"
-                    ]
+                # Parent resource ownership: tenant_id:%(network:tenant_id)s
+                # Python _enrich_target pre-fetches this as
+                # target["network:tenant_id"]
+                target_key = self.target_field
+                if target_key.startswith("ext_parent_"):
+                    # _enrich_target stores all ext_parent data under
+                    # the generic key "ext_parent:<field>"
+                    _, field = target_key.split(":", 1)
+                    target_key = f"ext_parent:{field}"
+                return [
+                    f'input.target["{target_key}"] == input.credentials.{self.check.kind}'
+                ]
             else:
-                global_results.setdefault("lib", []).append(
-                    GET_FUNCTIONS["security_group"]
-                )
                 return [
                     f"input.target.{self.target_field} == input.credentials.{self.target_field}"
                 ]
@@ -752,20 +704,19 @@ class NeutronOwnerCheck(BaseOpaCheck):
         reverse: bool = False,
     ) -> list[dict[str, typing.Any]]:
         if hasattr(self, "target_field") and ":" in self.target_field:
-            res, field = self.target_field.split(":")
-            res_field = f"{res}_id"
-            if res.startswith("ext_parent_"):
-                res = res[11:]
-            if res != "ext_parent":
-                return [
-                    {
-                        "input": {
-                            "credentials": {self.check.kind: "bar"},
-                            "target": {res_field: "foo"},
-                        },
-                        f"data.lib.get_{res}": {field: "bar"},
-                    }
-                ]
+            # Parent resource: target["network:tenant_id"] style
+            target_key = self.target_field
+            if target_key.startswith("ext_parent_"):
+                _, field = target_key.split(":", 1)
+                target_key = f"ext_parent:{field}"
+            return [
+                {
+                    "input": {
+                        "credentials": {self.check.kind: "bar"},
+                        "target": {target_key: "bar"},
+                    },
+                }
+            ]
         return [{"input": {}}]
 
 
@@ -788,7 +739,8 @@ class NeutronFieldCheck(BaseOpaCheck):
         else:
             self.left = f"input.target.{self.field}"
         if self.value.startswith("~"):
-            self.check = f'regex.match("{self.value}", {self.left})'
+            pattern = self.value[1:]
+            self.check = f'regex.match("{pattern}", {self.left})'
         else:
             # This is a string so we need to figure out what is it: a string,
             # an int, bool, None, ...
@@ -808,17 +760,10 @@ class NeutronFieldCheck(BaseOpaCheck):
         self, global_results: dict[str, list[str]]
     ) -> list[str]:
         check: str = ""
-        # resource, field_value = self.check._orig_match.split(":", 1)
-        # field, value = field_value.split("=", 1)
-        # if ":" in field:
-        #    left = f'input["{field}"]'
-        # else:
-        #    left = f"input.{field}"
         if self.value.startswith("~"):
-            check = f'regex.match("{self.value}", {self.left})'
+            pattern = self.value[1:]
+            check = f'regex.match("{pattern}", {self.left})'
         else:
-            # This is a string so we need to figure out what is it: a string,
-            # an int, bool, None, ...
             try:
                 right = ast.literal_eval(self.value)
                 if isinstance(right, bool):
@@ -832,15 +777,15 @@ class NeutronFieldCheck(BaseOpaCheck):
                     check = f"{self.left} == {right}"
             except (ValueError, SyntaxError):
                 check = f'{self.left} == "{self.value}"'
+        # For shared network checks, use the pre-enriched target field
+        # instead of http.send. Python _prepare_check normalizes
+        # shared/networks:shared before policy evaluation.
         if self.resource == "networks" and self.field == "shared":
             if right == "":
                 right = "true"
             elif right == "not":
                 right = "false"
-            check = f'net := lib.get_network(input.target.network_id)\nnet["{self.field}"] == {right}'
-            global_results.setdefault("lib", []).append(
-                GET_FUNCTIONS["network"]
-            )
+            check = f'input.target["{self.resource}:{self.field}"] == {right}'
         return [check]
 
     def get_opa_incremental_rule_name(self) -> str:
@@ -886,15 +831,16 @@ class NeutronFieldCheck(BaseOpaCheck):
         if self.resource == "networks" and self.field == "shared":
             return [
                 {
-                    "input": {"target": {"network_id": "foo"}},
-                    "data.lib.get_network": {"shared": True},
+                    "input": {"target": {"network_id": "foo", "networks:shared": True}},
                 }
             ]
-        elif (
-            self.check
-            == 'regex.match("~^network:", input.target.device_owner)'
-        ):
-            return [{"input": {"target": {"device_owner": "network:foo"}}}]
+        elif self.value.startswith("~"):
+            # Provide a value that matches the regex pattern
+            return [
+                {
+                    "input": {"target": {self.field: "network:dhcp"}},
+                }
+            ]
         else:
             value: typing.Any
             try:
@@ -994,4 +940,7 @@ def convert_oslo_policy_check_to_opa_check(
             return NeutronOwnerCheck(opc)
         elif opc.__class__.__name__ == "FieldCheck":
             return NeutronFieldCheck(opc)
+    # Service-specific custom checks that behave like GenericCheck
+    if hasattr(opc, 'kind') and hasattr(opc, 'match'):
+        return GenericCheck(opc)
     raise NotImplementedError(f"Check {type(opc)} is not supported")

@@ -1,13 +1,11 @@
 package volume_extension.volume_type_access.addProjectAccess
 
-import data.lib
+import data.cinder_lib
 
 # Add volume type access for project.
 # POST  /types/{type_id}/action (addProjectAccess)
-#"volume_extension:volume_type_access:addProjectAccess": "rule:admin_api"
-
+# "volume_extension:volume_type_access:addProjectAccess": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

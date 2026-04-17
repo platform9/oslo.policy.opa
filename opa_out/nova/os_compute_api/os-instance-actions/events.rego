@@ -1,6 +1,6 @@
 package os_compute_api.os_instance_actions.events
 
-import data.lib
+import data.nova_lib
 
 # Add events details in action details for a server. This check is
 # performed only after the check os_compute_api:os-instance-
@@ -11,10 +11,8 @@ import data.lib
 # enforcement passes, the name of the host.
 # GET  /servers/{server_id}/os-instance-actions/{request_id}
 # Intended scope(s): project
-#"os_compute_api:os-instance-actions:events": "rule:context_is_admin"
-
+# "os_compute_api:os-instance-actions:events": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

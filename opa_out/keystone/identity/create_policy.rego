@@ -1,14 +1,12 @@
 package identity.create_policy
 
-import data.lib
+import data.keystone_lib
 
 # Create policy.
 # POST  /v3/policies
 # Intended scope(s): system, project
-#"identity:create_policy": "rule:admin_required"
-
+# "identity:create_policy": "rule:admin_required"
 
 allow if {
-  lib.admin_required
+	keystone_lib.admin_required
 }
-

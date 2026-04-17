@@ -1,6 +1,6 @@
 package os_compute_api.servers.create.zero_disk_flavor
 
-import data.lib
+import data.nova_lib
 
 # This rule controls the compute API validation behavior of creating a
 # server with a flavor that has 0 disk, indicating the server should
@@ -19,10 +19,9 @@ import data.lib
 # https://bugs.launchpad.net/nova/+bug/1739646 for details.
 # POST  /servers
 # Intended scope(s): project
-#"os_compute_api:servers:create:zero_disk_flavor": "rule:context_is_admin"
-
+# Target attrs: availability_zone, domain_id, project_id, user_id
+# "os_compute_api:servers:create:zero_disk_flavor": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

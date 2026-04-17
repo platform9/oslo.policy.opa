@@ -1,14 +1,12 @@
 package update_quota
 
-import data.lib
+import data.neutron_lib
 
 # Update a resource quota
 # PUT  /quota/{id}
 # Intended scope(s): project
-#"update_quota": "rule:admin_only"
-
+# "update_quota": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

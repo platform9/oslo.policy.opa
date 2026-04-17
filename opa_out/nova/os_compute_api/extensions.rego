@@ -5,10 +5,6 @@ package os_compute_api.extensions
 # GET  /extensions
 # GET  /extensions/{alias}
 # Intended scope(s): project
-#"os_compute_api:extensions": "@"
+# "os_compute_api:extensions": "@"
 
-
-allow if {
-  
-}
-
+allow if {}

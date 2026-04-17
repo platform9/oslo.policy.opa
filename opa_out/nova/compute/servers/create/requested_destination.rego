@@ -1,6 +1,6 @@
 package compute.servers.create.requested_destination
 
-import data.lib
+import data.nova_lib
 
 # Create a server on the requested compute service host and/or
 # hypervisor_hostname.
@@ -10,10 +10,8 @@ import data.lib
 # ``os_compute_api:servers:create:forced_host`` rule.
 # POST  /servers
 # Intended scope(s): project
-#"compute:servers:create:requested_destination": "rule:context_is_admin"
-
+# "compute:servers:create:requested_destination": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

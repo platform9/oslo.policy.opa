@@ -1,6 +1,6 @@
 package volume_extension.types_extra_specs.read_sensitive
 
-import data.lib
+import data.cinder_lib
 
 # Include extra_specs fields that may reveal sensitive information
 # about the deployment that should not be exposed to end users in
@@ -10,10 +10,8 @@ import data.lib
 # GET  /types/{type_id}
 # GET  /types/{type_id}/extra_specs
 # GET  /types/{type_id}/extra_specs/{extra_spec_key}
-#"volume_extension:types_extra_specs:read_sensitive": "rule:admin_api"
-
+# "volume_extension:types_extra_specs:read_sensitive": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

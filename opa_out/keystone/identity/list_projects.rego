@@ -1,45 +1,9 @@
 package identity.list_projects
 
-import data.lib
-
 # List projects.
 # GET  /v3/projects
 # Intended scope(s): system, domain, project
-#"identity:list_projects": "(rule:admin_required) or (role:reader and system_scope:all) or (role:reader and domain_id:%(target.domain_id)s)"
+# Target attrs: target.project.description, target.project.domain_id, target.project.enabled, target.project.extra, target.project.id, target.project.is_domain, target.project.name, target.project.parent_id
+# "identity:list_projects": "(rule:admin_required) or (role:reader and system_scope:all) or (role:reader and domain_id:%(target.domain_id)s)"
 
-
-allow if {
-  #rule:admin_required
-lib.admin_required
-}
-
-allow if {
-  reader_and_creds_system_scope_eq_all
-}
-
-allow if {
-  reader_and_creds_domain_id_eq_input_target_domain_id
-}
-
-#(role:reader and system_scope:all)
-reader_and_creds_system_scope_eq_all if {
-  "reader" in input.credentials.roles
-  input.credentials.system_scope == "all"
-}
-
-#domain_id:%(target.domain_id)s
-creds_domain_id_eq_input_target_domain_id if {
-  input.credentials.domain_id == input.target.target.domain_id
-}
-
-#domain_id:%(target.domain_id)s
-creds_domain_id_eq_input_target_domain_id if {
-  input.credentials.domain_id == input.target["target.domain_id"]
-}
-
-#(role:reader and domain_id:%(target.domain_id)s)
-reader_and_creds_domain_id_eq_input_target_domain_id if {
-  "reader" in input.credentials.roles
-  creds_domain_id_eq_input_target_domain_id
-}
-
+allow if {}

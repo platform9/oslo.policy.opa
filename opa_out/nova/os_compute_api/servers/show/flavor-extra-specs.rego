@@ -1,6 +1,6 @@
 package os_compute_api.servers.show.flavor_extra_specs
 
-import data.lib
+import data.nova_lib
 
 # Starting with microversion 2.47, the flavor and its extra specs used
 # for a server is also returned in the response when showing server
@@ -10,10 +10,9 @@ import data.lib
 # PUT  /servers/{server_id}
 # POST  /servers/{server_id}/action (rebuild)
 # Intended scope(s): project
-#"os_compute_api:servers:show:flavor-extra-specs": "rule:project_reader_or_admin"
-
+# Target attrs: availability_zone, domain_id, project_id, user_id
+# "os_compute_api:servers:show:flavor-extra-specs": "rule:project_reader_or_admin"
 
 allow if {
-  lib.project_reader_or_admin
+	nova_lib.project_reader_or_admin
 }
-

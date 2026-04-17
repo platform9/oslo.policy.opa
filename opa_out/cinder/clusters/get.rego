@@ -1,13 +1,12 @@
 package clusters.get
 
-import data.lib
+import data.cinder_lib
 
 # Show cluster.
 # GET  /clusters/{cluster_id}
-#"clusters:get": "rule:admin_api"
-
+# Target attrs: domain_id, project_id, user_id
+# "clusters:get": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

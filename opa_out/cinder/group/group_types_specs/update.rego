@@ -1,13 +1,12 @@
 package group.group_types_specs.update
 
-import data.lib
+import data.cinder_lib
 
 # Update a group type spec.
 # PUT  /group_types/{group_type_id}/group_specs/{g_spec_id}
-#"group:group_types_specs:update": "rule:admin_api"
-
+# Target attrs: domain_id, project_id, user_id
+# "group:group_types_specs:update": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

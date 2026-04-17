@@ -1,14 +1,13 @@
 package os_compute_api.servers.rebuild
 
-import data.lib
+import data.nova_lib
 
 # Rebuild a server
 # POST  /servers/{server_id}/action (rebuild)
 # Intended scope(s): project
-#"os_compute_api:servers:rebuild": "rule:project_member_or_admin"
-
+# Target attrs: availability_zone, domain_id, project_id, user_id
+# "os_compute_api:servers:rebuild": "rule:project_member_or_admin"
 
 allow if {
-  lib.project_member_or_admin
+	nova_lib.project_member_or_admin
 }
-

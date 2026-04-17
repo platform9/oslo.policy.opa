@@ -2,6 +2,4 @@ package identity_delete_project_tags_test
 
 import data.identity.delete_project_tags
 
-test_admin_required_or_manager_and_creds_domain_id_eq_input_target_project_domain_id_0 if delete_project_tags.allow with input as {"credentials": {"roles": ["admin"]}}
-test_admin_required_or_manager_and_creds_domain_id_eq_input_target_project_domain_id_1 if delete_project_tags.allow with input as {"credentials": {"is_admin": 1}}
-test_admin_required_or_manager_and_creds_domain_id_eq_input_target_project_domain_id_2 if delete_project_tags.allow with input as {"credentials": {"roles": ["manager"], "domain_id": "foo"}, "target": {"target": {"project": {"domain_id": "foo"}}}}
+test_system_admin_0 if delete_project_tags.allow with input as {"credentials": {"user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": 1, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": [], "token": {"domain": {"id": "default"}, "project": {"domain": {"id": "default"}}}}, "target": {"domain_id": "domain-a", "target.domain_id": "domain-a", "target.user.domain_id": "domain-a", "target.project.domain_id": "domain-a", "target.project.id": "project-a", "target.group.domain_id": "domain-a", "user": {"domain_id": "domain-a"}, "project": {"id": "project-a", "domain_id": "domain-a"}, "group": {"domain_id": "domain-a"}, "domain": {"id": "domain-a"}}}

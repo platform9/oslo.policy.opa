@@ -1,13 +1,11 @@
 package volume_extension.qos_specs_manage.create
 
-import data.lib
+import data.cinder_lib
 
 # Create qos specs.
 # POST  /qos-specs
-#"volume_extension:qos_specs_manage:create": "rule:admin_api"
-
+# "volume_extension:qos_specs_manage:create": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

@@ -1,14 +1,13 @@
 package create_flavor
 
-import data.lib
+import data.neutron_lib
 
 # Create a flavor
 # POST  /flavors
 # Intended scope(s): project
-#"create_flavor": "rule:admin_only"
-
+# Target attrs: description, domain_id, enabled, id, name, service_profiles, service_type
+# "create_flavor": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

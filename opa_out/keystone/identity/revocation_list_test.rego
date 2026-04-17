@@ -2,6 +2,5 @@ package identity_revocation_list_test
 
 import data.identity.revocation_list
 
-test_revocation_list_0 if revocation_list.allow with input as {"credentials": {"roles": ["admin"]}}
-test_revocation_list_1 if revocation_list.allow with input as {"credentials": {"is_admin": 1}}
-test_revocation_list_2 if revocation_list.allow with input as {"credentials": {"roles": ["service"]}}
+test_system_admin_0 if revocation_list.allow with input as {"credentials": {"user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": 1, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": [], "token": {"domain": {"id": "default"}, "project": {"domain": {"id": "default"}}}}, "target": {"domain_id": "domain-a", "target.domain_id": "domain-a", "target.user.domain_id": "domain-a", "target.project.domain_id": "domain-a", "target.project.id": "project-a", "target.group.domain_id": "domain-a", "user": {"domain_id": "domain-a"}, "project": {"id": "project-a", "domain_id": "domain-a"}, "group": {"domain_id": "domain-a"}, "domain": {"id": "domain-a"}}}
+test_service_user_1 if revocation_list.allow with input as {"credentials": {"project_id": "service-project", "user_id": "service-user", "user_domain_id": "default", "project_domain_id": "default", "is_admin": 0, "is_admin_project": false, "roles": ["service"], "service_roles": [], "token": {"project": {"domain": {"id": "default"}}}}, "target": {"domain_id": "domain-a", "target.domain_id": "domain-a"}}

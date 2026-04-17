@@ -2,5 +2,4 @@ package volume_extension_volume_type_access_get_all_for_type_test
 
 import data.volume_extension.volume_type_access.get_all_for_type
 
-test_get_all_for_type_0 if get_all_for_type.allow with input as {"credentials": {"is_admin": true}}
-test_get_all_for_type_1 if get_all_for_type.allow with input as {"credentials": {"roles": ["admin"], "is_admin_project": true}}
+test_system_admin_0 if get_all_for_type.allow with input as {"credentials": {"project_id": "sys-project-1", "user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": true, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": []}, "target": {"project_id": "project-a", "domain_id": "domain-a"}}

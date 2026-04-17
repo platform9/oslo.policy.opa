@@ -1,13 +1,11 @@
 package volume_extension.volume_actions.terminate_connection
 
-import data.lib
+import data.cinder_lib
 
 # Terminate volume attachment.
 # POST  /volumes/{volume_id}/action (os-terminate_connection)
-#"volume_extension:volume_actions:terminate_connection": "rule:xena_system_admin_or_project_member"
-
+# "volume_extension:volume_actions:terminate_connection": "rule:xena_system_admin_or_project_member"
 
 allow if {
-  lib.xena_system_admin_or_project_member
+	cinder_lib.xena_system_admin_or_project_member
 }
-

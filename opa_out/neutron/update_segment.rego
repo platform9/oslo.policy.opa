@@ -1,14 +1,13 @@
 package update_segment
 
-import data.lib
+import data.neutron_lib
 
 # Update a segment
 # PUT  /segments/{id}
 # Intended scope(s): project
-#"update_segment": "rule:admin_only"
-
+# Target attrs: domain_id, id, name, network_id, network_type, physical_network, segmentation_id
+# "update_segment": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

@@ -1,6 +1,6 @@
 package os_compute_api.os_remote_consoles
 
-import data.lib
+import data.nova_lib
 
 # Generate a URL to access remote server console.
 #
@@ -14,10 +14,8 @@ import data.lib
 # POST  /servers/{server_id}/action (os-getVNCConsole)
 # POST  /servers/{server_id}/remote-consoles
 # Intended scope(s): project
-#"os_compute_api:os-remote-consoles": "rule:project_member_or_admin"
-
+# "os_compute_api:os-remote-consoles": "rule:project_member_or_admin"
 
 allow if {
-  lib.project_member_or_admin
+	nova_lib.project_member_or_admin
 }
-

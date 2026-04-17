@@ -2,5 +2,4 @@ package volume_extension_services_index_test
 
 import data.volume_extension.services.index
 
-test_index_0 if index.allow with input as {"credentials": {"is_admin": true}}
-test_index_1 if index.allow with input as {"credentials": {"roles": ["admin"], "is_admin_project": true}}
+test_system_admin_0 if index.allow with input as {"credentials": {"project_id": "sys-project-1", "user_id": "sys-admin-user", "user_domain_id": "default", "project_domain_id": "default", "domain_id": "default", "system_scope": "all", "is_admin": true, "is_admin_project": true, "roles": ["admin", "member", "reader"], "service_roles": []}, "target": {"project_id": "project-a", "domain_id": "domain-a"}}

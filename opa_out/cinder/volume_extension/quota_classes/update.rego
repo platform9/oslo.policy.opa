@@ -1,13 +1,11 @@
 package volume_extension.quota_classes.update
 
-import data.lib
+import data.cinder_lib
 
 # Update project quota class.
 # PUT  /os-quota-class-sets/{project_id}
-#"volume_extension:quota_classes:update": "rule:admin_api"
-
+# "volume_extension:quota_classes:update": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

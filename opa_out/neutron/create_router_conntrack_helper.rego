@@ -1,25 +1,24 @@
 package create_router_conntrack_helper
 
-import data.lib
+import data.neutron_lib
 
 # Create a router conntrack helper
 # POST  /routers/{router_id}/conntrack_helpers
 # Intended scope(s): project
-#"create_router_conntrack_helper": "(rule:admin_only) or (role:member and rule:ext_parent_owner)"
-
+# Target attrs: admin_state_up, availability_zone_hints, availability_zones, conntrack_helpers, distributed, domain_id, enable_default_route_bfd, enable_default_route_ecmp, enable_ndp_proxy, external_gateway_info, external_gateways, flavor_id, ha, id, name, routes, service_type_id, status, tenant_id
+# "create_router_conntrack_helper": "(rule:admin_only) or (role:member and rule:ext_parent_owner)"
 
 allow if {
-  #rule:admin_only
-lib.admin_only
+	# rule:admin_only
+	neutron_lib.admin_only
 }
 
 allow if {
-  member_and_ext_parent_owner
+	member_and_ext_parent_owner
 }
 
-#(role:member and rule:ext_parent_owner)
+# (role:member and rule:ext_parent_owner)
 member_and_ext_parent_owner if {
-  "member" in input.credentials.roles
-  lib.ext_parent_owner
+	"member" in input.credentials.roles
+	neutron_lib.ext_parent_owner
 }
-

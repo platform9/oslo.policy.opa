@@ -1,13 +1,11 @@
 package volume_extension.volume_manage
 
-import data.lib
+import data.cinder_lib
 
 # Manage existing volumes.
 # POST  /manageable_volumes
-#"volume_extension:volume_manage": "rule:admin_api"
-
+# "volume_extension:volume_manage": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

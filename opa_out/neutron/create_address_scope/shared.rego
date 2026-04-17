@@ -1,14 +1,13 @@
 package create_address_scope.shared
 
-import data.lib
+import data.neutron_lib
 
 # Create a shared address scope
 # POST  /address-scopes
 # Intended scope(s): project
-#"create_address_scope:shared": "rule:admin_only"
-
+# Target attrs: domain_id, id, ip_version, name, shared, tenant_id
+# "create_address_scope:shared": "rule:admin_only"
 
 allow if {
-  lib.admin_only
+	neutron_lib.admin_only
 }
-

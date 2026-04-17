@@ -1,14 +1,12 @@
 package os_compute_api.os_migrate_server.migrate
 
-import data.lib
+import data.nova_lib
 
 # Cold migrate a server without specifying a host
 # POST  /servers/{server_id}/action (migrate)
 # Intended scope(s): project
-#"os_compute_api:os-migrate-server:migrate": "rule:project_manager_or_admin"
-
+# "os_compute_api:os-migrate-server:migrate": "rule:context_is_admin"
 
 allow if {
-  lib.project_manager_or_admin
+	nova_lib.context_is_admin
 }
-

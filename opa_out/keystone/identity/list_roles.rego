@@ -1,42 +1,25 @@
 package identity.list_roles
 
-import data.lib
+import data.keystone_lib
 
 # List roles.
 # GET  /v3/roles
 # HEAD  /v3/roles
 # Intended scope(s): system, domain, project
-#"identity:list_roles": "(rule:admin_required or (role:reader and system_scope:all)) or (role:manager and not domain_id:None)"
-
-
-allow if {
-  admin_required_or_reader_and_creds_system_scope_eq_all
-}
+# Target attrs: target.role.description, target.role.domain_id, target.role.extra, target.role.id, target.role.name
+# "identity:list_roles": "rule:admin_required or (role:reader and system_scope:all)"
 
 allow if {
-  manager_and_not_creds_domain_id_eq_None
+	# rule:is_domain_manager
+	keystone_lib.is_domain_manager
 }
 
-#(role:reader and system_scope:all)
-reader_and_creds_system_scope_eq_all if {
-  "reader" in input.credentials.roles
-  input.credentials.system_scope == "all"
+allow if {
+	# rule:base_list_roles
+	keystone_lib.base_list_roles
 }
 
-#(rule:admin_required or (role:reader and system_scope:all))
-admin_required_or_reader_and_creds_system_scope_eq_all if {
-  #rule:admin_required
-lib.admin_required
+allow if {
+	# rule:admin_required
+	keystone_lib.admin_required
 }
-
-#(rule:admin_required or (role:reader and system_scope:all))
-admin_required_or_reader_and_creds_system_scope_eq_all if {
-  reader_and_creds_system_scope_eq_all
-}
-
-#(role:manager and not domain_id:None)
-manager_and_not_creds_domain_id_eq_None if {
-  "manager" in input.credentials.roles
-  not is_null(input.credentials.domain_id)
-}
-

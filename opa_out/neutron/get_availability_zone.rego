@@ -3,10 +3,9 @@ package get_availability_zone
 # List availability zones
 # GET  /availability_zones
 # Intended scope(s): project
-#"get_availability_zone": "role:reader"
-
+# Target attrs: domain_id, name, resource, state
+# "get_availability_zone": "role:reader"
 
 allow if {
-  "reader" in input.credentials.roles
+	"reader" in input.credentials.roles
 }
-

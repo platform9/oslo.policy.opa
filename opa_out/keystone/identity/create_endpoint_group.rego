@@ -1,14 +1,12 @@
 package identity.create_endpoint_group
 
-import data.lib
+import data.keystone_lib
 
 # Create endpoint group.
 # POST  /v3/OS-EP-FILTER/endpoint_groups
 # Intended scope(s): system, project
-#"identity:create_endpoint_group": "rule:admin_required"
-
+# "identity:create_endpoint_group": "rule:admin_required"
 
 allow if {
-  lib.admin_required
+	keystone_lib.admin_required
 }
-

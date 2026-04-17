@@ -4,10 +4,9 @@ package get_rule_type
 # GET  /qos/rule-types
 # GET  /qos/rule-types/{rule_type}
 # Intended scope(s): project
-#"get_rule_type": "role:reader"
-
+# Target attrs: domain_id, drivers, type
+# "get_rule_type": "role:reader"
 
 allow if {
-  "reader" in input.credentials.roles
+	"reader" in input.credentials.roles
 }
-

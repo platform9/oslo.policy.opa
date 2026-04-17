@@ -1,13 +1,11 @@
 package volume_extension.qos_specs_manage.get
 
-import data.lib
+import data.cinder_lib
 
 # Show qos specs.
 # GET  /qos-specs/{qos_id}
-#"volume_extension:qos_specs_manage:get": "rule:admin_api"
-
+# "volume_extension:qos_specs_manage:get": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-

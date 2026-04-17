@@ -1,45 +1,24 @@
 package identity.list_domains
 
-import data.lib
+import data.keystone_lib
 
 # List domains.
 # GET  /v3/domains
 # Intended scope(s): system, domain, project
-#"identity:list_domains": "rule:admin_required or (role:reader and system_scope:all) or (role:reader and domain_id:%(target.domain.id)s)"
-
-
-allow if {
-  #rule:admin_required
-lib.admin_required
-}
+# Target attrs: target.domain.description, target.domain.domain_id, target.domain.enabled, target.domain.extra, target.domain.id, target.domain.is_domain, target.domain.name, target.domain.parent_id
+# "identity:list_domains": "rule:admin_required or (role:reader and system_scope:all) or (role:reader and domain_id:%(target.domain.id)s)"
 
 allow if {
-  reader_and_creds_system_scope_eq_all
+	# rule:is_domain_manager
+	keystone_lib.is_domain_manager
 }
 
 allow if {
-  reader_and_creds_domain_id_eq_input_target_domain_id
+	# rule:base_list_domains
+	keystone_lib.base_list_domains
 }
 
-#(role:reader and system_scope:all)
-reader_and_creds_system_scope_eq_all if {
-  "reader" in input.credentials.roles
-  input.credentials.system_scope == "all"
+allow if {
+	# rule:admin_required
+	keystone_lib.admin_required
 }
-
-#domain_id:%(target.domain.id)s
-creds_domain_id_eq_input_target_domain_id if {
-  input.credentials.domain_id == input.target.target.domain.id
-}
-
-#domain_id:%(target.domain.id)s
-creds_domain_id_eq_input_target_domain_id if {
-  input.credentials.domain_id == input.target["target.domain.id"]
-}
-
-#(role:reader and domain_id:%(target.domain.id)s)
-reader_and_creds_domain_id_eq_input_target_domain_id if {
-  "reader" in input.credentials.roles
-  creds_domain_id_eq_input_target_domain_id
-}
-

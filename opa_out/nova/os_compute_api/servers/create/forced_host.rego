@@ -1,6 +1,6 @@
 package os_compute_api.servers.create.forced_host
 
-import data.lib
+import data.nova_lib
 
 # Create a server on the specified host and/or node.
 #
@@ -9,10 +9,9 @@ import data.lib
 # ``compute:servers:create:requested_destination`` rule.
 # POST  /servers
 # Intended scope(s): project
-#"os_compute_api:servers:create:forced_host": "rule:context_is_admin"
-
+# Target attrs: availability_zone, domain_id, project_id, user_id
+# "os_compute_api:servers:create:forced_host": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

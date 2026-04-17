@@ -1,6 +1,6 @@
 package identity.revoke_grant
 
-import data.lib
+import data.keystone_lib
 
 # Revoke a role grant between a target and an actor. A target can be
 # either a domain or a project. An actor can be either a user or a
@@ -18,197 +18,25 @@ import data.lib
 # DELETE  /v3/OS-INHERIT/domains/{domain_id}/users/{user_id}/roles/{role_id}/inherited_to_projects
 # DELETE  /v3/OS-INHERIT/domains/{domain_id}/groups/{group_id}/roles/{role_id}/inherited_to_projects
 # Intended scope(s): system, domain, project
-#"identity:revoke_grant": "(rule:admin_required) or ((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)) and (domain_id:%(target.role.domain_id)s or None:%(target.role.domain_id)s) or ((role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)) and rule:domain_managed_target_role"
-
-
-allow if {
-  #rule:admin_required
-lib.admin_required
-}
+# Target attrs: target.domain.description, target.domain.domain_id, target.domain.enabled, target.domain.extra, target.domain.id, target.domain.is_domain, target.domain.name, target.domain.parent_id, target.project.description, target.project.domain_id, target.project.enabled, target.project.extra, target.project.id, target.project.is_domain, target.project.name, target.project.parent_id, target.role.description, target.role.domain_id, target.role.extra, target.role.id, target.role.name, target.user.created_at, target.user.default_project_id, target.user.domain_id, target.user.enabled, target.user.extra, target.user.id, target.user.last_active_at
+# "identity:revoke_grant": "(rule:admin_required) or ((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)) and (domain_id:%(target.role.domain_id)s or None:%(target.role.domain_id)s)"
 
 allow if {
-  admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id_and_creds_domain_id_eq_input_target_role_domain_id_or_input_target_role_domain_id_empty
+	domain_manager_grant_and_is_domain_managed_role
 }
 
 allow if {
-  manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id_and_domain_managed_target_role
+	# rule:base_revoke_grant
+	keystone_lib.base_revoke_grant
 }
 
-#domain_id:%(target.user.domain_id)s
-creds_domain_id_eq_input_target_user_domain_id if {
-  input.credentials.domain_id == input.target.target.user.domain_id
+allow if {
+	# rule:admin_required
+	keystone_lib.admin_required
 }
 
-#domain_id:%(target.user.domain_id)s
-creds_domain_id_eq_input_target_user_domain_id if {
-  input.credentials.domain_id == input.target["target.user.domain_id"]
+# (rule:domain_manager_grant and rule:is_domain_managed_role)
+domain_manager_grant_and_is_domain_managed_role if {
+	keystone_lib.domain_manager_grant
+	keystone_lib.is_domain_managed_role
 }
-
-#domain_id:%(target.project.domain_id)s
-creds_domain_id_eq_input_target_project_domain_id if {
-  input.credentials.domain_id == input.target.target.project.domain_id
-}
-
-#domain_id:%(target.project.domain_id)s
-creds_domain_id_eq_input_target_project_domain_id if {
-  input.credentials.domain_id == input.target["target.project.domain_id"]
-}
-
-#(role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s)
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id if {
-  "admin" in input.credentials.roles
-  creds_domain_id_eq_input_target_user_domain_id
-  creds_domain_id_eq_input_target_project_domain_id
-}
-
-#domain_id:%(target.domain.id)s
-creds_domain_id_eq_input_target_domain_id if {
-  input.credentials.domain_id == input.target.target.domain.id
-}
-
-#domain_id:%(target.domain.id)s
-creds_domain_id_eq_input_target_domain_id if {
-  input.credentials.domain_id == input.target["target.domain.id"]
-}
-
-#(role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s)
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  "admin" in input.credentials.roles
-  creds_domain_id_eq_input_target_user_domain_id
-  creds_domain_id_eq_input_target_domain_id
-}
-
-#domain_id:%(target.group.domain_id)s
-creds_domain_id_eq_input_target_group_domain_id if {
-  input.credentials.domain_id == input.target.target.group.domain_id
-}
-
-#domain_id:%(target.group.domain_id)s
-creds_domain_id_eq_input_target_group_domain_id if {
-  input.credentials.domain_id == input.target["target.group.domain_id"]
-}
-
-#(role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s)
-admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id if {
-  "admin" in input.credentials.roles
-  creds_domain_id_eq_input_target_group_domain_id
-  creds_domain_id_eq_input_target_project_domain_id
-}
-
-#(role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)
-admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  "admin" in input.credentials.roles
-  creds_domain_id_eq_input_target_group_domain_id
-  creds_domain_id_eq_input_target_domain_id
-}
-
-#((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id
-}
-
-#((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id
-}
-
-#((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id
-}
-
-#((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id
-}
-
-#domain_id:%(target.role.domain_id)s
-creds_domain_id_eq_input_target_role_domain_id if {
-  input.credentials.domain_id == input.target.target.role.domain_id
-}
-
-#domain_id:%(target.role.domain_id)s
-creds_domain_id_eq_input_target_role_domain_id if {
-  input.credentials.domain_id == input.target["target.role.domain_id"]
-}
-
-#None:%(target.role.domain_id)s
-input_target_role_domain_id_empty if {
-  is_null(input.target.target.role.domain_id)
-}
-
-#None:%(target.role.domain_id)s
-input_target_role_domain_id_empty if {
-  is_null(input.target["target.role.domain_id"])
-}
-
-#(domain_id:%(target.role.domain_id)s or None:%(target.role.domain_id)s)
-creds_domain_id_eq_input_target_role_domain_id_or_input_target_role_domain_id_empty if {
-  creds_domain_id_eq_input_target_role_domain_id
-}
-
-#(domain_id:%(target.role.domain_id)s or None:%(target.role.domain_id)s)
-creds_domain_id_eq_input_target_role_domain_id_or_input_target_role_domain_id_empty if {
-  input_target_role_domain_id_empty
-}
-
-#(((role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:admin and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)) and (domain_id:%(target.role.domain_id)s or None:%(target.role.domain_id)s))
-admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id_and_creds_domain_id_eq_input_target_role_domain_id_or_input_target_role_domain_id_empty if {
-  admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_admin_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id
-  creds_domain_id_eq_input_target_role_domain_id_or_input_target_role_domain_id_empty
-}
-
-#(role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s)
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id if {
-  "manager" in input.credentials.roles
-  creds_domain_id_eq_input_target_user_domain_id
-  creds_domain_id_eq_input_target_project_domain_id
-}
-
-#(role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s)
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  "manager" in input.credentials.roles
-  creds_domain_id_eq_input_target_user_domain_id
-  creds_domain_id_eq_input_target_domain_id
-}
-
-#(role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s)
-manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id if {
-  "manager" in input.credentials.roles
-  creds_domain_id_eq_input_target_group_domain_id
-  creds_domain_id_eq_input_target_project_domain_id
-}
-
-#(role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)
-manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  "manager" in input.credentials.roles
-  creds_domain_id_eq_input_target_group_domain_id
-  creds_domain_id_eq_input_target_domain_id
-}
-
-#((role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id
-}
-
-#((role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id
-}
-
-#((role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id
-}
-
-#((role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s))
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id if {
-  manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id
-}
-
-#(((role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.user.domain_id)s and domain_id:%(target.domain.id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.project.domain_id)s) or (role:manager and domain_id:%(target.group.domain_id)s and domain_id:%(target.domain.id)s)) and rule:domain_managed_target_role)
-manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id_and_domain_managed_target_role if {
-  manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_user_domain_id_and_creds_domain_id_eq_input_target_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_project_domain_id_or_manager_and_creds_domain_id_eq_input_target_group_domain_id_and_creds_domain_id_eq_input_target_domain_id
-  lib.domain_managed_target_role
-}
-

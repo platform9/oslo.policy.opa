@@ -1,0 +1,301 @@
+# Neutron persona definitions for rego test generation.
+# Each persona defines a realistic credential shape matching what
+# keystonemiddleware sends to oslo.policy enforce().
+#
+# Neutron uses tenant_id (aliased from project_id) for ownership.
+# Target includes parent resource fields populated by _enrich_target()
+# in neutron/policy.py (e.g. network:tenant_id from network_id lookup).
+#
+# target_resources maps policy name patterns to additional target fields
+# that _enrich_target populates from DB lookups at enforce() time.
+
+# Enriched target fields added by _enrich_target() for specific resource types.
+# These are merged into target_defaults when the policy name matches the pattern.
+target_resources:
+  # Port policies: _enrich_target fetches network:tenant_id and networks:shared
+  # from the port's network_id
+  port:
+    patterns: ["port", "binding"]
+    fields:
+      network_id: "net-1"
+      "network:tenant_id": "project-a"
+      "networks:shared": false
+
+  # Subnet policies: same as port (subnet belongs to a network)
+  subnet:
+    patterns: ["subnet"]
+    fields:
+      network_id: "net-1"
+      "network:tenant_id": "project-a"
+      "networks:shared": false
+
+  # Security group related: sg_owner checks security_group:tenant_id
+  security_group_rule:
+    patterns: ["security_group_rule"]
+    fields:
+      security_group_id: "sg-1"
+      "security_group:tenant_id": "project-a"
+
+  # Floatingip port forwarding: ext_parent is the floatingip
+  floatingip_port_forwarding:
+    patterns: ["floatingip_port_forwarding"]
+    fields:
+      ext_parent_floatingip_id: "fip-1"
+      "ext_parent:tenant_id": "project-a"
+      "ext_parent_floatingip:tenant_id": "project-a"
+
+  # QoS policy rules: ext_parent is the QoS policy
+  policy_rule:
+    patterns: ["policy_bandwidth_limit_rule", "policy_dscp_marking_rule",
+               "policy_minimum_bandwidth_rule", "policy_minimum_packet_rate_rule",
+               "policy_packet_rate_limit_rule",
+               "alias_bandwidth_limit_rule", "alias_dscp_marking_rule",
+               "alias_minimum_bandwidth_rule", "alias_minimum_packet_rate_rule"]
+    fields:
+      ext_parent_policy_id: "qos-policy-1"
+      "ext_parent:tenant_id": "project-a"
+      "ext_parent_policy:tenant_id": "project-a"
+
+  # Router conntrack helpers: ext_parent is the router
+  router_conntrack_helper:
+    patterns: ["router_conntrack_helper"]
+    fields:
+      ext_parent_router_id: "router-1"
+      "ext_parent:tenant_id": "project-a"
+      "ext_parent_router:tenant_id": "project-a"
+
+  # Local IP port associations
+  local_ip_port_association:
+    patterns: ["local_ip_port_association"]
+    fields:
+      "ext_parent:tenant_id": "project-a"
+
+  # Floatingip operations (not port_forwarding): direct ownership
+  floatingip:
+    patterns: ["floatingip"]
+    fields:
+      "ext_parent:tenant_id": "project-a"
+
+  # Port device_owner policies: need a network-type device_owner so
+  # regex.match fires and not-network_device does not short-circuit
+  port_device_owner:
+    patterns: ["device_owner"]
+    fields:
+      device_owner: "network:dhcp"
+
+  # Port binding operations
+  port_binding:
+    patterns: ["port_binding", "binding_profile", "binding:profile"]
+    fields:
+      network_id: "net-1"
+      "network:tenant_id": "project-a"
+      "networks:shared": false
+
+  # RBAC policies: target_tenant field check (FieldCheck - not evaluable in rego)
+  rbac_policy_target:
+    patterns: ["rbac_policy:target_tenant", "rbac_policy:target_project",
+               "rbac_policy_target_tenant", "rbac_policy_target_project"]
+    fields:
+      target_tenant: "project-a"
+      target_project: "project-a"
+
+  # Shared resources: networks:shared field
+  shared_network:
+    patterns: ["get_network"]
+    fields:
+      "networks:shared": false
+
+personas:
+  system_admin:
+    description: "System-scoped admin, bypasses domain isolation"
+    credentials:
+      tenant_id: "sys-project-1"
+      project_id: "sys-project-1"
+      user_id: "sys-admin-user"
+      user_domain_id: "default"
+      project_domain_id: "default"
+      domain_id: "default"
+      system_scope: "all"
+      is_admin: true
+      is_admin_project: true
+      roles: ["admin", "member", "reader"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  project_admin:
+    description: "Project-scoped admin in domain-a"
+    credentials:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      user_id: "admin-user-1"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: true
+      is_admin_project: true
+      roles: ["admin", "member", "reader"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  project_member:
+    description: "Project member in domain-a"
+    credentials:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      user_id: "member-user-1"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: ["member"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  project_reader:
+    description: "Project reader in domain-a"
+    credentials:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      user_id: "reader-user-1"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: ["reader"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  project_manager:
+    description: "Project manager in domain-a"
+    credentials:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      user_id: "manager-user-1"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: ["manager", "member"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  service_user:
+    description: "Service account (e.g. nova calling neutron)"
+    credentials:
+      tenant_id: "service-project"
+      project_id: "service-project"
+      user_id: "service-user"
+      user_domain_id: "default"
+      project_domain_id: "default"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: ["service"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  advsvc_user:
+    description: "Advanced service role user"
+    credentials:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      user_id: "advsvc-user"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: ["advsvc"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  # Denial personas
+  cross_domain_admin:
+    description: "Admin from domain-b accessing domain-a resources"
+    deny: true
+    credentials:
+      tenant_id: "project-b"
+      project_id: "project-b"
+      user_id: "admin-user-b"
+      user_domain_id: "domain-b"
+      project_domain_id: "domain-b"
+      domain_id: null
+      system_scope: null
+      is_admin: true
+      is_admin_project: true
+      roles: ["admin", "member", "reader"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  cross_project_member:
+    description: "Member from project-b accessing project-a resources (same domain)"
+    deny: true
+    credentials:
+      tenant_id: "project-b"
+      project_id: "project-b"
+      user_id: "member-user-b"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: ["member"]
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"
+
+  wrong_role:
+    description: "User with no relevant roles and no project match"
+    deny: true
+    credentials:
+      tenant_id: "project-c"
+      project_id: "project-c"
+      user_id: "norole-user"
+      user_domain_id: "domain-a"
+      project_domain_id: "domain-a"
+      domain_id: null
+      system_scope: null
+      is_admin: false
+      is_admin_project: false
+      roles: []
+      service_roles: []
+    target_defaults:
+      tenant_id: "project-a"
+      project_id: "project-a"
+      domain_id: "domain-a"

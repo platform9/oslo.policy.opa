@@ -1,6 +1,6 @@
 package os_compute_api.os_instance_actions.events.details
 
-import data.lib
+import data.nova_lib
 
 # Add "details" key in action events for a server.
 #
@@ -14,10 +14,8 @@ import data.lib
 # information about the deployment (e.g. the type of the hypervisor).
 # GET  /servers/{server_id}/os-instance-actions/{request_id}
 # Intended scope(s): project
-#"os_compute_api:os-instance-actions:events:details": "rule:context_is_admin"
-
+# "os_compute_api:os-instance-actions:events:details": "rule:context_is_admin"
 
 allow if {
-  lib.context_is_admin
+	nova_lib.context_is_admin
 }
-

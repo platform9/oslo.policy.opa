@@ -1,13 +1,11 @@
 package volume_extension.quotas.update
 
-import data.lib
+import data.cinder_lib
 
 # Update project quota.
 # PUT  /os-quota-sets/{project_id}
-#"volume_extension:quotas:update": "rule:admin_api"
-
+# "volume_extension:quotas:update": "rule:admin_api"
 
 allow if {
-  lib.admin_api
+	cinder_lib.admin_api
 }
-
